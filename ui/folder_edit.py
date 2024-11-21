@@ -26,13 +26,12 @@
  *   Vertical Photo Placer Plugin. If not, see <http://www.gnu.org/licenses/>.            *
  ******************************************************************************************/
 """
-
 from qgis.PyQt.QtWidgets import QMessageBox, QLineEdit
 import os
 
-class FileEdit(QLineEdit):
+class FolderEdit(QLineEdit):
     def __init__(self, parent):
-        super(FileEdit, self).__init__(parent)
+        super(FolderEdit, self).__init__(parent)
 
         self.setDragEnabled(True)
 
@@ -53,20 +52,12 @@ class FileEdit(QLineEdit):
         urls = data.urls()
         if urls and urls[0].scheme() == 'file':
             filepath = str(urls[0].path())[1:]
-            if os.path.isfile(filepath):
-                if filepath.lower().endswith('.tif'):
-                    self.setText(filepath)
-                else:
-                    dialog = QMessageBox()
-                    dialog.setSizeGripEnabled(True)
-                    dialog.setWindowTitle("Error: Invalid Input")
-                    dialog.setText("Only GeoTIFF file is accepted")
-                    dialog.setIcon(QMessageBox.Warning)
-                    dialog.exec_()
+            if os.path.isdir(filepath):
+                self.setText(filepath)
             else:
                 dialog = QMessageBox()
                 dialog.setSizeGripEnabled(True)
                 dialog.setWindowTitle("Error: Invalid Input")
-                dialog.setText("Only file is accepted")
+                dialog.setText("Only folder is accepted")
                 dialog.setIcon(QMessageBox.Warning)
                 dialog.exec_()
