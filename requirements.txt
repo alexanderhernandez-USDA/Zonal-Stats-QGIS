@@ -1,0 +1,7 @@
+rasterio
+owslib
+numpy
+pyproj
+geopandas
+scikit-image
+exactextract
