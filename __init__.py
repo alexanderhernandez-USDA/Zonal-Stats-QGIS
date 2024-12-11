@@ -37,8 +37,9 @@ def plugin_prep():
         print(subprocess.run([installer,qgis_py_path], capture_output=True))
         #print(os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"))
         #print(os.path.join(os.getcwd(),"requirements.txt"))
-        sys.stderr = open('install_err.log', 'w')
-        pip.main(["install","-t",os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"),"-r",os.path.join(os.getcwd(),"requirements.txt")])
+        with open('install_err.log','w') as f:
+            sys.stderr = f
+            pip.main(["install","-t",os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"),"-r",os.path.join(os.getcwd(),"requirements.txt")])
     if platform.system() == "Linux" or platform.system() == "Darwin":
         installer = "install.sh"
         installer = os.path.join(os.path.dirname(__file__), installer)

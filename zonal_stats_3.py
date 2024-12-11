@@ -1,7 +1,6 @@
 import geopandas as gpd
 import pandas as pd
 import os, sys, re, shutil
-#from index_functions import *
 import rasterio
 import numpy as np
 import multiprocessing
@@ -9,10 +8,7 @@ import multiprocessing.pool
 from shapely import unary_union
 from skimage import io
 from skimage.color import rgb2hsv
-#import geopandas
 from exactextract import exact_extract
-#from exiftool import ExifToolHelper
-import shlex
 #from osgeo import gdal
 #gdal.UseExceptions()
 import math
@@ -84,7 +80,7 @@ dgci = False
 no_index = False
 uid = 'id'
 no_ind_dir = ''
-date_regex = "([0-3][0-9]_[0-3][0-9]_[0-9]{2,4}|[0-9]{2,4}_[0-3][0-9]_[0-3][0-9])"
+date_regex = "([0-3]?[0-9](_|-)[0-3]?[0-9](_|-)[0-9]{2,4}|[0-9]{2,4}(_|-)[0-3]?[0-9](_|-)[0-3]?[0-9])"
 to_run = []
 threads = 1
 polygons = True
@@ -121,7 +117,7 @@ def run_all(proc_dir,t,in_dir,tName,bands,r=None,gdf=None,pool=None,wide_open=Fa
         print("No indices to run on! Likely missing indices.conf!")
         return
     if type(pool) != type(None) and wide_open:
-        pool.starmap(sub_process_image,[(i,in_dir,t,bands,tName) for i in list(indexDict.keys())[4:]])
+        pool.starmap(sub_process_image,[(proc_dir,i,in_dir,t,bands,tName) for i in list(indexDict.keys())[4:]])
     else:
         for i in list(indexDict.keys())[4:]:
             write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
@@ -220,7 +216,8 @@ def read_config(conf):
     global vegIndices
     if not os.path.exists(conf):
         return
-    configs = open(conf,"r").read().split("\n")
+    with open(conf,"r") as f:
+        configs = f.read().split("\n")
     for i in configs:
         if i=="":
             continue
@@ -292,14 +289,15 @@ def process_image(proc_dir,r,t,in_dir,tName,index_list,gdf,bands,pool=None,wide_
 
 # sub function for exact extract, used for multiprocessing
 def exact_extract_sub(proc_dir,c,tName,gpkg):
-    gdf = gpd.read_file(gpkg)
+    layer = gpd.list_layers(gpkg).iloc[0]['name']
+    gpkg = gpd.read_file(gpkg,layer=layer)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         if 'VOLUME' in c:
-            res = exact_extract(os.path.join(proc_dir,tName,c),gdf,['sum'],output="pandas",include_cols=[uid])
+            res = exact_extract(os.path.join(proc_dir,tName,c),gpkg,['sum'],output="pandas",include_cols=[uid])
             res =  res.rename(columns={"sum":c.split("_")[-1].split(".tif")[0]+re.search(date_regex,c).group()})
         else:
-            res = exact_extract(os.path.join(proc_dir,tName,c),gdf,['median'],output="pandas",include_cols=[uid])
+            res = exact_extract(os.path.join(proc_dir,tName,c),gpkg,['median'],output="pandas",include_cols=[uid])
             res =  res.rename(columns={"median":c.split("_")[-1].split(".tif")[0]+re.search(date_regex,c).group()})
     return res
 
@@ -381,11 +379,11 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
     cont_run = True
     for t in tifs:
         if not re.search(date_regex+'[^0-9]',t):
-            print(f"{os.path.join(in_dir,t)} doesn't contain a date in the file name! Please fix filename!",file=sys.stderr)
+            print(f"{os.path.join(in_dir,t)} doesn't contain a date in the file name! Please fix filename!")
             cont_run = False
     if not cont_run:
-        print("Please correct filenames!",file=sys.stderr)
-        sys.exit(-1)
+        print("Please correct filenames!")
+        return "error"
     # Process images for current index flag
     if verbose:
         print(f"Starting image processing for calculation type(s): {r['indices']}, {len(tifs)} images found...")
@@ -408,7 +406,8 @@ def zonal_stats(to_run,gpkg,out_file):
             os.mkdir(proc_dir)
         except FileExistsError:
             None
-    gdf = gpd.read_file(gpkg)
+    layer = gpd.list_layers(gpkg).iloc[0]['name']
+    gdf = gpd.read_file(gpkg,layer=layer)
     try:
         gdf[uid] = gdf[uid].astype(str)
     except KeyError:
@@ -418,12 +417,16 @@ def zonal_stats(to_run,gpkg,out_file):
     if buffer == "circle":
         if verbose:
             print("Calculating circular buffer...")
+        #in_crs = str(gdf.crs).upper()
+        gdf = gdf.to_crs(str(gdf.estimate_utm_crs()).upper())
         gdf['geometry'] = gdf['geometry'].buffer(buffer_size)
         gdf.to_file(os.path.join(proc_dir,"buffered_circle_gdf.gpkg"),driver="GPKG", mode="w")
         gpkg = os.path.join(proc_dir,"buffered_circle_gdf.gpkg")
     elif buffer == "square":
         if verbose:
             print("Calculating square buffer...")
+        #in_crs = str(gdf.crs).upper()
+        gdf = gdf.to_crs(str(gdf.estimate_utm_crs()).upper())
         gdf['geometry'] = gdf['geometry'].buffer(buffer_size,cap_style=3)
         gdf.to_file(os.path.join(proc_dir,"buffered_square_gdf.gpkg"),driver="GPKG", mode="w")
         gpkg = os.path.join(proc_dir,"buffered_square_gdf.gpkg")
@@ -434,9 +437,12 @@ def zonal_stats(to_run,gpkg,out_file):
         open_pool = threads>(len(to_run)*2)
         total_images = sum([len(os.listdir(r['path'])) for r in to_run])
         wide_open = threads > ((len(to_run)*2)+(total_images*2))
-        pool.starmap(process_run,[(proc_dir,r,gdf,pool,open_pool,wide_open) for r in to_run])
+        res = pool.starmap(process_run,[(proc_dir,r,gdf,pool,open_pool,wide_open) for r in to_run])
         pool.close()
         pool.join()
+        if "error" in res:
+            print("Processing failed for some images, please correct errors and try again!")
+            sys.exit(1)
 
     # Run exact extract and get zonal statistics for generated images, or get point values and/or output rasters
     with multiprocessing.Manager() as manager:
@@ -473,7 +479,6 @@ def zonal_stats(to_run,gpkg,out_file):
             gdf = gdf.merge(x, on=uid)
 
     shutil.rmtree(proc_dir)
-    #os.system('rm -r '+proc_dir)
 
     # Create output geopackage
     gdf.columns = [c.split("_median")[0] for c in gdf.columns]

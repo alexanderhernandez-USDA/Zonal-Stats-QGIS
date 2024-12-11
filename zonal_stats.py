@@ -219,7 +219,7 @@ class ZonalStats:
         self.use_points = False
         self.use_buffer = False
         self.threads = 1
-        self.buffer_type = "circle"
+        self.buffer_type = "CIRCLE"
         self.buffer_size = 1
         self.save_output = False
         self.uid = "id"
@@ -381,9 +381,9 @@ class ZonalStats:
     
     def onBufferTypeChanged(self):
         if self.dlg.buffer_type.currentIndex() == 0:
-            self.buffer_type = "circle"
+            self.buffer_type = "CIRCLE"
         else:
-            self.buffer_type = "square"
+            self.buffer_type = "SQUARE"
 
     def onBufferSizeChanged(self):
         if self.dlg.buffer_size.text() == "":
@@ -507,6 +507,7 @@ class ZonalStats:
         args.append(str(self.threads))
         args.append("-u")
         args.append(self.uid)
+
         if self.use_points:
             if self.use_buffer:
                 if self.buffer_type == "CIRCLE":
@@ -552,11 +553,13 @@ class ZonalStats:
         args.append(self.input_gpkg)
         args.append(self.output_gpkg)
         self.dlg.progress_bar.setValue(0)
-        #print("test")
         try:
+            pre_count = QgsApplication.taskManager().countActiveTasks()
             ntask = QgsTask.fromFunction("zonal_stats_run",self.sub_wrapper,args)
             QgsApplication.taskManager().addTask(ntask)
             task_count = QgsApplication.taskManager().countActiveTasks()
+            print(task_count)
+
         except Exception as e:
             showDialog(window_title="Error!",
                        dialog_text=e,
