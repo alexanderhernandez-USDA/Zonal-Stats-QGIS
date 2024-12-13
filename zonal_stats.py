@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 from qgis.core import Qgis, QgsTask, QgsApplication
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, pyqtSignal, QObject
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QFileInfo, Qt
@@ -44,10 +44,12 @@ def showDialog(window_title, dialog_text, icon_level):
     dialog.setIcon(icon_level)
     dialog.exec_()
 
-class ZonalStats:
+class ZonalStats(QObject):
+    finished_signal = pyqtSignal(int,object)
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
+        super().__init__()
         """Constructor.
 
         :param iface: An interface instance that will be passed to this class
@@ -79,6 +81,7 @@ class ZonalStats:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        self.tm = QgsApplication.taskManager()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -174,7 +177,8 @@ class ZonalStats:
         vegIndices = []
         if not os.path.exists(conf):
             return vegIndices
-        configs = open(conf,"r").read().split("\n")
+        with open(conf,"r") as f:
+            configs = f.read().split("\n")
         for i in configs:
             if i=="":
                 continue
@@ -554,33 +558,49 @@ class ZonalStats:
         args.append(self.output_gpkg)
         self.dlg.progress_bar.setValue(0)
         try:
-            pre_count = QgsApplication.taskManager().countActiveTasks()
+            #pre_count = self.tm.countActiveTasks()
             ntask = QgsTask.fromFunction("zonal_stats_run",self.sub_wrapper,args)
-            QgsApplication.taskManager().addTask(ntask)
-            task_count = QgsApplication.taskManager().countActiveTasks()
-            print(task_count)
+            self.finished_signal.connect(self.completed)
+            self.tm.addTask(ntask)
+            #task_count = self.tm.countActiveTasks()
+            #print(task_count)
 
         except Exception as e:
             showDialog(window_title="Error!",
                        dialog_text=e,
                        icon_level=QMessageBox.Critical)
             
-        
+    def completed(self,exception,result=None):
+        print("done")
+        if result.returncode != 0:
+            showDialog(window_title="Error!",
+                       dialog_text=result.stderr.decode(),
+                       icon_level=QMessageBox.Critical)
+            with open(self.log,"w+") as f:
+                f.write(result.stdout.decode())
+                f.write(result.stderr.decode())
+            return
+        with open(self.log,"w+") as f:
+            f.write(result.stdout.decode())
+            f.write(result.stderr.decode())
+        self.dlg.progress_bar.setValue(100)
 
     def sub_wrapper(self,task,args):
         if platform.system() == "Windows":
             res = subprocess.run(args, capture_output=True, shell=True)
         else:
             res = subprocess.run(args, capture_output=True)
-        if res.returncode != 0:
-            showDialog(window_title="Error!",
-                       dialog_text=res.stderr.decode(),
-                       icon_level=QMessageBox.Critical)
-            with open(self.log,"w+") as f:
-                f.write(res.stdout.decode())
-                f.write(res.stderr.decode())
-            return
-        with open(self.log,"w+") as f:
-            f.write(res.stdout.decode())
-            f.write(res.stderr.decode())
-        self.dlg.progress_bar.setValue(100)
+        self.finished_signal.emit(res.returncode,res)
+        return res
+        #if res.returncode != 0:
+        #    showDialog(window_title="Error!",
+        #               dialog_text=res.stderr.decode(),
+        #               icon_level=QMessageBox.Critical)
+        #    with open(self.log,"w+") as f:
+        #        f.write(res.stdout.decode())
+        #        f.write(res.stderr.decode())
+        #    return
+        #with open(self.log,"w+") as f:
+        #    f.write(res.stdout.decode())
+        #    f.write(res.stderr.decode())
+        #self.dlg.progress_bar.setValue(100)

@@ -99,11 +99,12 @@ def get_band(raster,bands,band):
 
 # Write processing tif from raster data for an index, copies over original tags as well
 def write_tif(proc_dir,data,t,in_dir,tName,i):
+    if data is None:
+        print(f"Error in processing {tName}_{i}!",file=sys.stderr)
+        return "ERROR"
     meta = data[1]
     data = data[0]
-    #print(meta)
-    if data is None:
-        return
+
     meta.update({
         "count": 1,
         "dtype": np.float32
@@ -114,19 +115,23 @@ def write_tif(proc_dir,data,t,in_dir,tName,i):
 # Run all standard vegetation indices
 def run_all(proc_dir,t,in_dir,tName,bands,r=None,gdf=None,pool=None,wide_open=False):
     if len(indexDict.keys()) < 5:
-        print("No indices to run on! Likely missing indices.conf!")
+        print("No indices to run on! Likely missing indices.conf!",file=sys.stderr)
         return
     if type(pool) != type(None) and wide_open:
         pool.starmap(sub_process_image,[(proc_dir,i,in_dir,t,bands,tName) for i in list(indexDict.keys())[4:]])
     else:
         for i in list(indexDict.keys())[4:]:
-            write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+            res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+            if res=="ERROR":
+                return 'ERROR'
 
 # Run a list of vegetation indices
 def run_list(proc_dir,t,in_dir,tName,bands,indexFlags):
     for i in indexFlags:
         if i in indexDict:
-            write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+            res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+            if res=="ERROR":
+                return 'ERROR'
         else:
             print("Unrecognized vegetation index: "+i+", skipping this index")
             continue
@@ -150,13 +155,17 @@ def calc_DGCI(raster,bands):
 
 # Run DGCI (wrapper for calc_DGCI)
 def run_dgci(proc_dir,t,in_dir,tName,bands,r,gdf):
-    write_tif(proc_dir,calc_DGCI(os.path.join(in_dir,t),bands),t,in_dir,tName,"DGCI")
+    res = write_tif(proc_dir,calc_DGCI(os.path.join(in_dir,t),bands),t,in_dir,tName,"DGCI")
+    if res=='ERROR':
+        return 'ERROR'
 
 # Make a copy of image for raw data statistics
 def run_raw(proc_dir,t,in_dir,tName,bands,r,gdf):
     #print(bands)
     for b in bands:
-        write_tif(proc_dir,get_band(os.path.join(in_dir,t),bands,b),t,in_dir,tName,f"{b}")
+        res = write_tif(proc_dir,get_band(os.path.join(in_dir,t),bands,b),t,in_dir,tName,f"{b}")
+        if res=='ERROR':
+            return 'ERROR'
 
 # Run volume calculation
 def calc_volume(proc_dir,t,in_dir,tName,bands,r,gdf):
@@ -250,8 +259,8 @@ def read_config(conf):
                                                 re = ds[bands.index('rededge')]
                                             try:
                                                 res = {calc}
-                                            except Exception as e:
-                                                print('Failed to run index {name}: '+e)
+                                            except:
+                                                print('Failed to run index {name}: This is likely due to a misspelling of band names. Valid names are:\\nred,green,blue,rededge,nir',file=sys.stderr)
                                                 return None
                                             return res, out_meta""")
             indexDict[name] = locals()[f'calc_{name}']
@@ -262,9 +271,10 @@ read_config(os.path.join(script_dir,"indices.conf"))
 # sub function for image processing, used for multiprocessing
 def sub_process_image(proc_dir,i,in_dir,t,bands,tName):
     if i in indexDict:
-        #print(i)
-        write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
-        #print(i)
+        res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+        if res=='ERROR':
+            print(f"Failed to process index: {i} due to previous errors!",file=sys.stderr)
+            return "ERROR"
     else:
         print("Unrecognized vegetation index: "+i+", skipping this index")
     return i
@@ -280,12 +290,14 @@ def process_image(proc_dir,r,t,in_dir,tName,index_list,gdf,bands,pool=None,wide_
         if type(pool) != type(None) and wide_open:
             res = pool.starmap(sub_process_image,[(proc_dir,i,in_dir,t,bands,tName) for i in index_list])
         else:
-            run_list(proc_dir,t,in_dir,tName,bands,index_list)
+            res = run_list(proc_dir,t,in_dir,tName,bands,index_list)
     else:
         if r['indices'] == 'ALL' and type(pool) != type(None) and wide_open:
-            run_all(proc_dir,t,in_dir,tName,bands,None,None,pool,wide_open)
+            res = run_all(proc_dir,t,in_dir,tName,bands,None,None,pool,wide_open)
         else:
-            indexDict[r['indices']](proc_dir,t,in_dir,tName,bands,r,gdf)
+            res = indexDict[r['indices']](proc_dir,t,in_dir,tName,bands,r,gdf)
+    if res is not None and "ERROR" in res:
+        return "ERROR"
 
 # sub function for exact extract, used for multiprocessing
 def exact_extract_sub(proc_dir,c,tName,gpkg):
@@ -393,6 +405,8 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
         results = pool.starmap(process_image,[(proc_dir,r,t,in_dir,t.split('.tif')[0],index_list,gdf,bands,pool,wide_open) for t in tifs])
     else:
         results = [process_image(proc_dir,r,t,in_dir,t.split('.tif')[0],index_list,gdf,bands) for t in tifs]
+    if "ERROR" in results:
+        return "error"
     if verbose:
         print(f"Finished {r['indices']}")
 
