@@ -223,6 +223,7 @@ class ZonalStats(QObject):
         self.use_points = False
         self.use_buffer = False
         self.threads = 1
+        self.calc = "NONE"
         self.buffer_type = "CIRCLE"
         self.buffer_size = 1
         self.save_output = False
@@ -562,8 +563,9 @@ class ZonalStats(QObject):
             ntask = QgsTask.fromFunction("zonal_stats_run",self.sub_wrapper,args)
             self.finished_signal.connect(self.completed)
             self.tm.addTask(ntask)
-            #task_count = self.tm.countActiveTasks()
+            task_count = self.tm.countActiveTasks()
             #print(task_count)
+            #print("run")
 
         except Exception as e:
             showDialog(window_title="Error!",
@@ -571,7 +573,7 @@ class ZonalStats(QObject):
                        icon_level=QMessageBox.Critical)
             
     def completed(self,exception,result=None):
-        print("done")
+        #print("done")
         if result.returncode != 0:
             showDialog(window_title="Error!",
                        dialog_text=result.stderr.decode(),
@@ -592,15 +594,3 @@ class ZonalStats(QObject):
             res = subprocess.run(args, capture_output=True)
         self.finished_signal.emit(res.returncode,res)
         return res
-        #if res.returncode != 0:
-        #    showDialog(window_title="Error!",
-        #               dialog_text=res.stderr.decode(),
-        #               icon_level=QMessageBox.Critical)
-        #    with open(self.log,"w+") as f:
-        #        f.write(res.stdout.decode())
-        #        f.write(res.stderr.decode())
-        #    return
-        #with open(self.log,"w+") as f:
-        #    f.write(res.stdout.decode())
-        #    f.write(res.stderr.decode())
-        #self.dlg.progress_bar.setValue(100)
