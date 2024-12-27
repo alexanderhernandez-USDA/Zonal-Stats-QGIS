@@ -440,7 +440,7 @@
                 </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Use point extraction (If geopackage contains points, not polygons)</string>
+                 <string>Use points (If geopackage contains points, not polygons)</string>
                 </property>
               </widget>
              </item>
