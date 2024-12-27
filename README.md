@@ -13,9 +13,9 @@ Download the zonal_stats.zip file in this repository. In QGIS, go to the plugins
 ## Usage
 Once the plugin has been installed, you can open it by clicking on its icon. The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. Please verify that these images contain dates in their filenames. Dates can be delimited using ., _, or -. The following are three vaild formats:
 
-YYYY_MM_DD
-DD.MM.YYYY
-MM-DD-YYYY
+YYYY_MM_DD  
+DD.MM.YYYY  
+MM-DD-YYYY  
 
 After selecting your input folder, input geopackage, and output geopackage, you can then select the calculation/extraction type. There are four options:
 1. Raw Extraction - Gets raw values from images
