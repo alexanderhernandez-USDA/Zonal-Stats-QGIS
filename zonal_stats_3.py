@@ -2,6 +2,7 @@ import geopandas as gpd
 import pandas as pd
 import os, sys, re, shutil
 import rasterio
+from rasterio.mask import mask
 import numpy as np
 import multiprocessing
 import multiprocessing.pool
@@ -542,14 +543,6 @@ if __name__ == '__main__':
                             toRemove.append(sys.argv[n+1])
                         else:
                             print(f"{sys.argv[n+1]} is an invalid path for output directory!")
-                    #if "b" in a:
-                    #    flag = True
-                    #    if sys.argv[n+1][0] == "[" and sys.argv[n+1][-1] == "]":
-                    #        bands = sys.argv[n+1][1:-1].split(',')
-                    #        toRemove.append(sys.argv[n+1])
-                    #    else:
-                    #        print("Invalid use of -b flag, expected [<raster bands>], not "+sys.argv[n+1])
-                    #        sys.exit(-1)
                     if "i" in a:
                         flag = True
                         if sys.argv[n+1][0] == "[" and sys.argv[n+1][-1] == "]":
