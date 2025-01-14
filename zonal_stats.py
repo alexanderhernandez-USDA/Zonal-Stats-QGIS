@@ -282,6 +282,7 @@ class ZonalStats(QObject):
         self.dlg.buffer_size.textChanged.connect(self.onBufferSizeChanged)
         self.dlg.run_all.stateChanged.connect(self.onRunAllChanged)
 
+        self.finished_signal.connect(self.completed)
         #self.setupWelcomePhoto()
 
         
@@ -561,7 +562,6 @@ class ZonalStats(QObject):
         try:
             #pre_count = self.tm.countActiveTasks()
             ntask = QgsTask.fromFunction("zonal_stats_run",self.sub_wrapper,args)
-            self.finished_signal.connect(self.completed)
             self.tm.addTask(ntask)
             task_count = self.tm.countActiveTasks()
             #print(task_count)

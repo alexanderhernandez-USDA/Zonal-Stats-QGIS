@@ -79,7 +79,6 @@ default_bands = ['red','green','blue','rededge','nir']
 valid_types = ['tif','tiff']
 dgci = False
 no_index = False
-uid = 'id'
 no_ind_dir = ''
 date_regex = "([0-3]?[0-9](_|-|\.)[0-3]?[0-9](_|-|\.)[0-9]{2,4}|[0-9]{2,4}(_|-|\.)[0-3]?[0-9](_|-|\.)[0-3]?[0-9])"
 to_run = []
@@ -89,6 +88,7 @@ buffer = None
 buffer_size = 0
 script_dir = os.path.dirname(os.path.realpath(__file__))
 output = None
+aoi_file = None
 
 
 # Get a single band from an image
@@ -162,7 +162,6 @@ def run_dgci(proc_dir,t,in_dir,tName,bands,r,gdf):
 
 # Make a copy of image for raw data statistics
 def run_raw(proc_dir,t,in_dir,tName,bands,r,gdf):
-    #print(bands)
     for b in bands:
         res = write_tif(proc_dir,get_band(os.path.join(in_dir,t),bands,b),t,in_dir,tName,f"{b}")
         if res=='ERROR':
@@ -260,8 +259,19 @@ def read_config(conf):
                                                 re = ds[bands.index('rededge')]
                                             try:
                                                 res = {calc}
-                                            except:
-                                                print('Failed to run index {name}: This is likely due to a misspelling of band names. Valid names are:\\nred,green,blue,rededge,nir',file=sys.stderr)
+                                            except Exception as e:
+                                                e = str(e)
+                                                if "'r'" in e:
+                                                    missing = "red"
+                                                elif "'g'" in e:
+                                                    missing = "green"
+                                                elif "'b'" in e:
+                                                    missing = "blue"
+                                                elif "'n'" in e:
+                                                    missing = "nir"
+                                                elif "'re'" in e:
+                                                    missing = "rededge"
+                                                print(f'Failed to run index {name}: missing band {{missing}}. This is likely due to a misspelling of band names. Valid names are:\\nred,green,blue,rededge,nir',file=sys.stderr)
                                                 return None
                                             return res, out_meta""")
             indexDict[name] = locals()[f'calc_{name}']
@@ -301,7 +311,7 @@ def process_image(proc_dir,r,t,in_dir,tName,index_list,gdf,bands,pool=None,wide_
         return "ERROR"
 
 # sub function for exact extract, used for multiprocessing
-def exact_extract_sub(proc_dir,c,tName,gpkg):
+def exact_extract_sub(proc_dir,c,tName,gpkg,uid):
     layer = gpd.list_layers(gpkg).iloc[0]['name']
     gpkg = gpd.read_file(gpkg,layer=layer)
     with warnings.catch_warnings():
@@ -315,14 +325,14 @@ def exact_extract_sub(proc_dir,c,tName,gpkg):
     return res
 
 # Run exact extract and get zonal statistics for processed images
-def run_exact_extract(proc_dir,tName,gpkg,pool,open_pool):
+def run_exact_extract(proc_dir,tName,gpkg,pool,open_pool,uid):
     calc_tifs = os.listdir(os.path.join(proc_dir,tName))
     if len(calc_tifs)==0:
         return None
     if open_pool:
-        results = pool.starmap(exact_extract_sub,[(proc_dir,c,tName,gpkg) for c in calc_tifs])
+        results = pool.starmap(exact_extract_sub,[(proc_dir,c,tName,gpkg,uid) for c in calc_tifs])
     else:
-        results = [exact_extract_sub(proc_dir,c,tName,gpkg) for c in calc_tifs]
+        results = [exact_extract_sub(proc_dir,c,tName,gpkg,uid) for c in calc_tifs]
 
     for n,res in enumerate(results):
         if n==0:
@@ -352,7 +362,7 @@ def get_point_values(proc_dir,tName,gdf,pool,open_pool):
     return df
 
 # Create multilayer tifs by date
-def get_multilayer_tif(proc_dir,subs):
+def get_multilayer_tif(proc_dir,subs,in_gpkg):
     total = 0
     layers = []
     names = []
@@ -373,6 +383,65 @@ def get_multilayer_tif(proc_dir,subs):
             dst.write_band(n+1,l)
         dst.descriptions = tuple(names)
 
+    if aoi_file is not None:
+        gpkg = gpd.read_file(aoi_file)
+        if "Undefined geographic SRS" in str(gpkg.crs):
+            print("Area of Interest gpkg has no CRS! Not clipping by AOI!")
+            return
+    else:
+        gpkg = gpd.read_file(in_gpkg)
+        gpkg['temp'] = 0
+        gpkg = gpkg.dissolve(by='temp')
+        gpkg['geometry'] = gpkg['geometry'].envelope
+
+    with rasterio.open(os.path.join(output,f"{date}_ZS_out.tif"),"r") as src:
+        vector = gpkg.to_crs(src.crs)
+        out_image, out_transform = mask(src,vector.geometry,crop=True,all_touched=True)
+        out_meta = src.meta.copy()
+    
+    out_meta.update({"height":out_image.shape[1], # height starts with shape[1]
+        "width":out_image.shape[2], # width starts with shape[2]
+        "transform":out_transform})
+
+    with rasterio.open(os.path.join(output,f"{date}_ZS_out.tif"),"w",**out_meta) as dst:
+        dst.write(out_image)
+        dst.descriptions = tuple(names)
+
+
+def pre_clip(img_dir,proc_dir,gpkg,band_len):
+    gpkg['temp'] = 0
+    gpkg = gpkg.dissolve(by='temp')
+    gpkg['geometry'] = gpkg['geometry'].envelope
+    tifs = os.listdir(img_dir)
+    tifs = [t for t in tifs if t.split('.')[-1].lower() in valid_types]
+    out_dir = os.path.join(proc_dir,f".{os.path.basename(os.path.abspath(img_dir))}_clips")
+    try:
+        os.mkdir(out_dir)
+    except FileExistsError:
+        None
+
+    for t in tifs:
+        with rasterio.open(os.path.join(img_dir,t)) as src:
+            vector = gpkg.to_crs(src.crs)
+            if(src.count != band_len):
+                print(f"Error: Raster band count and specified band count are not equal, raster has {src.count} bands, not {band_len}! Please check band names!",file=sys.stderr)
+                return "error"
+            try:
+                out_image, out_transform = mask(src,vector.geometry,crop=True,all_touched=True)
+            except ValueError:
+                print("Error: Input shapes from geopackage don't overlap raster!",file=sys.stderr)
+                return "error"
+            out_meta = src.meta.copy()
+
+            out_meta.update({"height":out_image.shape[1], # height starts with shape[1]
+            "width":out_image.shape[2], # width starts with shape[2]
+            "transform":out_transform,})
+            #"driver":"COG"})
+
+        with rasterio.open(os.path.join(out_dir,t),"w",**out_meta) as dst:
+            dst.write(out_image)
+
+    return out_dir
 
 
 # Main function for processing a specific 'run' or 'index'
@@ -392,14 +461,19 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
     cont_run = True
     for t in tifs:
         if not re.search(date_regex+'[^0-9]',t):
-            print(f"{os.path.join(in_dir,t)} doesn't contain a date in the file name! Please fix filename!")
+            print(f"{os.path.join(in_dir,t)} doesn't contain a date in the file name! Please fix filename!",file=sys.stderr)
             cont_run = False
     if not cont_run:
-        print("Please correct filenames!")
+        print("Please correct filenames!",file=sys.stderr)
         return "error"
     # Process images for current index flag
     if verbose:
         print(f"Starting image processing for calculation type(s): {r['indices']}, {len(tifs)} images found...")
+    
+    in_dir = pre_clip(in_dir,proc_dir,gdf,len(bands))
+
+    if in_dir == "error":
+        return "error"
 
     #pool = NDPool(threads)
     if open_pool:
@@ -412,7 +486,7 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
         print(f"Finished {r['indices']}")
 
 # Main function
-def zonal_stats(to_run,gpkg,out_file):
+def zonal_stats(to_run,gpkg,out_file,uid="id"):
     global proc_dir
     proc_dir = f".{os.getpid()}_proc_dir"
     # Create processing directories, read geopackage
@@ -427,6 +501,7 @@ def zonal_stats(to_run,gpkg,out_file):
         gdf[uid] = gdf[uid].astype(str)
     except KeyError:
         print(f"{uid} wasn't found as a field name in {gpkg}! Try changing the unique geopackage identifier (UID) option when running this script.",file=sys.stderr)
+        shutil.rmtree(proc_dir)
         sys.exit(-1)
     # If a buffer was specified, create buffered geopackage
     if buffer == "circle":
@@ -456,14 +531,15 @@ def zonal_stats(to_run,gpkg,out_file):
         pool.close()
         pool.join()
         if "error" in res:
-            print("Processing failed for some images, please correct errors and try again!")
+            print("Processing failed for some images, please correct errors and try again!",file=sys.stderr)
+            shutil.rmtree(proc_dir)
             sys.exit(1)
 
     # Run exact extract and get zonal statistics for generated images, or get point values and/or output rasters
     with multiprocessing.Manager() as manager:
         pool = manager.Pool(threads)
         sub_dirs = os.listdir(proc_dir)
-        sub_dirs = [s for s in sub_dirs if os.path.isdir(os.path.join(proc_dir,s))]
+        sub_dirs = [s for s in sub_dirs if os.path.isdir(os.path.join(proc_dir,s)) and s[0] != "."]
         open_pool = threads>(len(sub_dirs)*2)
         if output != None:
             out_dates = {}
@@ -475,11 +551,11 @@ def zonal_stats(to_run,gpkg,out_file):
                     out_dates[date] = [s]
             if verbose:
                 print(f"Outputting calculations/extractions to {output}")
-            results = pool.starmap(get_multilayer_tif,[(proc_dir,d) for d in out_dates.values()])
+            results = pool.starmap(get_multilayer_tif,[(proc_dir,d,gpkg) for d in out_dates.values()])
         if polygons:
             if verbose:
                 print("Extracting stats from processed images...")
-            results = pool.starmap(run_exact_extract,[(proc_dir,s,gpkg,pool,open_pool) for s in sub_dirs])
+            results = pool.starmap(run_exact_extract,[(proc_dir,s,gpkg,pool,open_pool,uid) for s in sub_dirs])
         else:
             if verbose:
                 print("Extracting point values from processed images...")
@@ -506,6 +582,7 @@ def zonal_stats(to_run,gpkg,out_file):
 
 # Argument handling and parsing
 if __name__ == '__main__':
+    uid = 'id'
     if len(sys.argv) < 4:
         if len(sys.argv) == 1:
             print(helpScreen)
@@ -542,7 +619,7 @@ if __name__ == '__main__':
                             output = sys.argv[n+1]
                             toRemove.append(sys.argv[n+1])
                         else:
-                            print(f"{sys.argv[n+1]} is an invalid path for output directory!")
+                            print(f"{sys.argv[n+1]} is an invalid path for output directory!",file=sys.stderr)
                     if "i" in a:
                         flag = True
                         if sys.argv[n+1][0] == "[" and sys.argv[n+1][-1] == "]":
@@ -553,13 +630,13 @@ if __name__ == '__main__':
                                     toRemove.append(sys.argv[n+3])
                                     to_run.append({"indices": sys.argv[n+1], "path": sys.argv[n+2], "bands": sys.argv[n+3]})
                                 else:
-                                    print("Invalid use of -i flag, specified directory "+sys.argv[n+2]+" isn't a directory")
+                                    print("Invalid use of -i flag, specified directory "+sys.argv[n+2]+" isn't a directory",file=sys.stderr)
                                     sys.exit(-1)
                             else:
-                                print(f"Invalid use of -i flag, {sys.argv[n+3]} is invalid format for band order")
+                                print(f"Invalid use of -i flag, {sys.argv[n+3]} is invalid format for band order",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print("Invalid use of -i flag, expected [<vegetation indices>], not "+sys.argv[n+1])
+                            print("Invalid use of -i flag, expected [<vegetation indices>], not "+sys.argv[n+1],file=sys.stderr)
                             sys.exit(-1)
                     
                     if "a" in a:
@@ -570,10 +647,10 @@ if __name__ == '__main__':
                                 toRemove.append(sys.argv[n+2])
                                 to_run.append({"indices": "ALL", "path": sys.argv[n+1], "bands": sys.argv[n+2]})
                             else:
-                                print("Invalid use of -a flag, specified directory "+sys.argv[n+1]+" isn't a directory")
+                                print("Invalid use of -a flag, specified directory "+sys.argv[n+1]+" isn't a directory",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print(f"Invalid use of -a flag, {sys.argv[n+1]} is invalid format for band order")
+                            print(f"Invalid use of -a flag, {sys.argv[n+1]} is invalid format for band order",file=sys.stderr)
                             sys.exit(-1)
                     if "n" in a:
                         flag = True
@@ -583,10 +660,10 @@ if __name__ == '__main__':
                                 toRemove.append(sys.argv[n+2])
                                 to_run.append({"indices": "NONE", "path": sys.argv[n+1], "bands": sys.argv[n+2]})
                             else:
-                                print("Invalid use of -n flag, specified directory "+sys.argv[n+1]+" isn't a directory")
+                                print("Invalid use of -n flag, specified directory "+sys.argv[n+1]+" isn't a directory",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print(f"Invalid use of -n flag, {sys.argv[n+1]} is invalid format for band order")
+                            print(f"Invalid use of -n flag, {sys.argv[n+2]} is invalid format for band order",file=sys.stderr)
                             sys.exit(-1)
                     if "v" in a:
                         flag = True
@@ -594,7 +671,7 @@ if __name__ == '__main__':
                             toRemove.append(sys.argv[n+1])
                             to_run.append({"indices": "VOLUME", "path": sys.argv[n+1], "ref": "NONE", "bands": "[height]"})
                         else:
-                            print("Invalid use of -v flag, specified directory "+sys.argv[n+1]+" isn't a directory")
+                            print("Invalid use of -v flag, specified directory "+sys.argv[n+1]+" isn't a directory",file=sys.stderr)
                             sys.exit(-1)
                     if "V" in a:
                         flag = True
@@ -604,10 +681,10 @@ if __name__ == '__main__':
                                 toRemove.append(sys.argv[n+2])
                                 to_run.append({"indices": "VOLUME", "path": sys.argv[n+1], "ref": sys.argv[n+2], "bands": "[height]"})
                             else:
-                                print("Invalid use of -V flag, specified references DSM, "+sys.argv[n+2]+" isn't a file or isn't correct file type")
+                                print("Invalid use of -V flag, specified references DSM, "+sys.argv[n+2]+" isn't a file or isn't correct file type",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print("Invalid use of -V flag, specified directory "+sys.argv[n+1]+" isn't a directory")
+                            print("Invalid use of -V flag, specified directory "+sys.argv[n+1]+" isn't a directory",file=sys.stderr)
                             sys.exit(-1)
                     if "t" in a:
                         flag = True
@@ -616,14 +693,15 @@ if __name__ == '__main__':
                                 threads = int(sys.argv[n+1])
                                 toRemove.append(sys.argv[n+1])
                             else:
-                                print(f"{sys.argv[n+1]} is too many threads, max threads you can specify on this device is {multiprocessing.cpu_count()-2}")
+                                print(f"{sys.argv[n+1]} is too many threads, max threads you can specify on this device is {multiprocessing.cpu_count()-2}",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print(f"{sys.argv[n+1]} is an invalid format for threads, should be an integer greater than 1")
+                            print(f"{sys.argv[n+1]} is an invalid format for threads, should be an integer greater than 1",file=sys.stderr)
+                            sys.exit(-1)
                     if "p" in a:
                         flag = True
                         if buffer!=None:
-                            print("-p flag cannot be used with -S or -C flags!")
+                            print("-p flag cannot be used with -S or -C flags!",file=sys.stderr)
                             sys.exit(-1)
                         polygons = False
                     if "C" in a:
@@ -633,14 +711,14 @@ if __name__ == '__main__':
                             if re.search("^([1-9]|0\.[0-9])[0-9]*",sys.argv[n+1]):
                                 buffer_size = float(sys.argv[n+1])
                                 if buffer_size <= 0:
-                                    print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a positive non-zero value!")
+                                    print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a positive non-zero value!",file=sys.stderr)
                                     sys.exit(-1)
                                 toRemove.append(sys.argv[n+1])
                             else:
-                                print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a numerical distance in meters!")
+                                print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a numerical distance in meters!",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print(f"-C flag cannot be used with -S or -p!")
+                            print(f"-C flag cannot be used with -S or -p!",file=sys.stderr)
                             sys.exit(-1)
                     if "S" in a:
                         flag = True
@@ -649,17 +727,17 @@ if __name__ == '__main__':
                             if re.search("^([1-9]|0\.[0-9])[0-9]*",sys.argv[n+1]):
                                 buffer_size = float(sys.argv[n+1])
                                 if buffer_size <= 0:
-                                    print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a positive non-zero value!")
+                                    print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a positive non-zero value!",file=sys.stderr)
                                     sys.exit(-1)
                                 toRemove.append(sys.argv[n+1])
                             else:
-                                print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a numerical distance in meters!")
+                                print(f"Invalid distance {sys.argv[n+1]} for buffer size, should be a numerical distance in meters!",file=sys.stderr)
                                 sys.exit(-1)
                         else:
-                            print(f"-S flag cannot be used with -C or -p!")
+                            print(f"-S flag cannot be used with -C or -p!",file=sys.stderr)
                             sys.exit(-1)
                 if not flag:
-                    print("Flag "+a+" unrecognized")
+                    print("Flag "+a+" unrecognized",file=sys.stderr)
                     sys.exit(-1)
                 toRemove.append(a)
         for i in toRemove:
@@ -669,6 +747,6 @@ if __name__ == '__main__':
             sys.exit(-1)
         else:
             if len(to_run) == 0:
-                print("Please pass indices to be run!!")
+                print("Please pass indices to be run!!",file=sys.stderr)
                 sys.exit(-1)
-            zonal_stats(to_run,sys.argv[1],sys.argv[2])
+            zonal_stats(to_run,sys.argv[1],sys.argv[2],uid=uid)
