@@ -227,7 +227,6 @@ class ZonalStats(QObject):
         self.buffer_type = "CIRCLE"
         self.buffer_size = 1
         self.save_output = False
-        self.uid = "id"
         self.band_order = ""
         self.img_folder = ""
         self.input_gpkg = ""
@@ -277,7 +276,6 @@ class ZonalStats(QObject):
         self.dlg.output_folder.textChanged.connect(self.onOutputFolderChanged)
         self.dlg.output_button.clicked.connect(self.onSelectOutputFolder)
         self.dlg.threads.textChanged.connect(self.onThreadsChanged)
-        self.dlg.uid.textChanged.connect(self.onUIDChanged)
         self.dlg.buffer_type.currentIndexChanged.connect(self.onBufferTypeChanged)
         self.dlg.buffer_size.textChanged.connect(self.onBufferSizeChanged)
         self.dlg.run_all.stateChanged.connect(self.onRunAllChanged)
@@ -424,10 +422,6 @@ class ZonalStats(QObject):
                 self.dlg.threads.setText("")
                 self.threads = 1
 
-    def onUIDChanged(self):
-        self.uid = self.dlg.uid.text()
-        if self.uid == "":
-            self.uid = "id"
 
     def onBandOrderChanged(self):
         if self.dlg.in_band_order.text() == "":
@@ -511,8 +505,6 @@ class ZonalStats(QObject):
         args = [self.exec, self.script]
         args.append("-t")
         args.append(str(self.threads))
-        args.append("-u")
-        args.append(self.uid)
 
         if self.use_points:
             if self.use_buffer:

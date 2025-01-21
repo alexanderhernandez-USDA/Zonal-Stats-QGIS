@@ -30,7 +30,6 @@ Global Options
     -h      Show this help
     -q      Suppress non-error messages
     -l      Show available vegetation indices
-    -u <uid>        Specify a unique ID column name from geopackage/shapefile (verify that it is actually unique, there cannot be any repeats)
     -t <threads>    Specify number of threads for multithreading, by default one thread is used, you can specify up to total thread count - 2
     -p              Use a geopackage that has points instead of polygons, returns values at those points
     -S <distance>   Use a geopackage that has points instead of polygons, and specify a distance in meters for a square buffer around the point
@@ -46,7 +45,7 @@ Index / Calculation options : Specify a directory (and band order if not a volum
 
 Examples:
 python3 zonal_stats_3.py -i [BI,SCI,GLI] flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg       #Runs with indices BI, SCI, and GLI
-python3 zonal_stats_3.py -u pid -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg             #Runs with all indices, unique ID column set to 'pid'
+python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg             #Runs with all indices
 python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg    #Runs all indices with band order red, green, blue, NIR, RedEdge
 python3 zonal_stats_3.py -n flight/thermals/ [swir] flight/rasters/ flight/package.gpkg zonal_stats.gpkg   #Runs zonal stats on the thermals directory getting raw values
 python3 zonal_stats_3.py -v flight/dsms/ flight/package.gpkg zonal_stats.gpkg                       # Performs volume calculation using a plane average
@@ -339,7 +338,6 @@ def run_exact_extract(proc_dir,tName,gpkg,pool,open_pool,uid):
             res_out = res
         else:
             res_out =  res_out.merge(res,on=uid)
-    
     res_out[uid] = res_out[uid].astype(str)
     return res_out
 
@@ -347,6 +345,7 @@ def run_exact_extract(proc_dir,tName,gpkg,pool,open_pool,uid):
 def get_point_values(proc_dir,tName,gdf,pool,open_pool):
     calc_tifs = os.listdir(os.path.join(proc_dir,tName))
     gdf = gpd.read_file(gdf)
+    uid = "tmp_ID_EE"
     data = {uid: gdf[uid]}
     for c in calc_tifs:
         stat_name = c.split("_")[-1].split(".tif")[0]+re.search(date_regex,c).group()
@@ -486,7 +485,7 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
         print(f"Finished {r['indices']}")
 
 # Main function
-def zonal_stats(to_run,gpkg,out_file,uid="id"):
+def zonal_stats(to_run,gpkg,out_file):
     global proc_dir
     proc_dir = f".{os.getpid()}_proc_dir"
     # Create processing directories, read geopackage
@@ -497,12 +496,12 @@ def zonal_stats(to_run,gpkg,out_file,uid="id"):
             None
     layer = gpd.list_layers(gpkg).iloc[0]['name']
     gdf = gpd.read_file(gpkg,layer=layer)
-    try:
-        gdf[uid] = gdf[uid].astype(str)
-    except KeyError:
-        print(f"{uid} wasn't found as a field name in {gpkg}! Try changing the unique geopackage identifier (UID) option when running this script.",file=sys.stderr)
-        shutil.rmtree(proc_dir)
-        sys.exit(-1)
+    gdf['tmp_ID_EE'] = gdf.index
+    uid = 'tmp_ID_EE'
+    gdf[uid] = gdf[uid].astype(str)
+    gdf.to_file(os.path.join(proc_dir,"tmp_id.gpkg"),driver="GPKG",mode="w")
+    gpkg = os.path.join(proc_dir,"tmp_id.gpkg")
+
     # If a buffer was specified, create buffered geopackage
     if buffer == "circle":
         if verbose:
@@ -568,12 +567,13 @@ def zonal_stats(to_run,gpkg,out_file,uid="id"):
     for x in results:
         if type(x) != type(None):
             gdf = gdf.merge(x, on=uid)
-
     shutil.rmtree(proc_dir)
 
     # Create output geopackage
     gdf.columns = [c.split("_median")[0] for c in gdf.columns]
     gdf.columns = [c.split("_sum")[0] for c in gdf.columns]
+    if uid=='tmp_ID_EE':
+        gdf.drop('tmp_ID_EE',axis=1,inplace=True)
     gdf.to_file(out_file, layer='stats', driver="GPKG", mode="w")
     if verbose:
         print("Finished!")
@@ -582,7 +582,6 @@ def zonal_stats(to_run,gpkg,out_file,uid="id"):
 
 # Argument handling and parsing
 if __name__ == '__main__':
-    uid = 'id'
     if len(sys.argv) < 4:
         if len(sys.argv) == 1:
             print(helpScreen)
@@ -609,10 +608,10 @@ if __name__ == '__main__':
                     if "q" in a:
                         verbose = False
                         flag = True
-                    if "u" in a:
-                        flag = True
-                        uid = sys.argv[n+1]
-                        toRemove.append(sys.argv[n+1])
+                    #if "u" in a:
+                    #    flag = True
+                    #    uid = sys.argv[n+1]
+                    #    toRemove.append(sys.argv[n+1])
                     if "o" in a:
                         flag = True
                         if os.path.exists(sys.argv[n+1]):
@@ -749,4 +748,4 @@ if __name__ == '__main__':
             if len(to_run) == 0:
                 print("Please pass indices to be run!!",file=sys.stderr)
                 sys.exit(-1)
-            zonal_stats(to_run,sys.argv[1],sys.argv[2],uid=uid)
+            zonal_stats(to_run,sys.argv[1],sys.argv[2])
