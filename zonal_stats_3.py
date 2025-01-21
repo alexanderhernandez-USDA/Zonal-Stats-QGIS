@@ -468,7 +468,7 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
     # Process images for current index flag
     if verbose:
         print(f"Starting image processing for calculation type(s): {r['indices']}, {len(tifs)} images found...")
-    
+
     in_dir = pre_clip(in_dir,proc_dir,gdf,len(bands))
 
     if in_dir == "error":
@@ -572,8 +572,7 @@ def zonal_stats(to_run,gpkg,out_file):
     # Create output geopackage
     gdf.columns = [c.split("_median")[0] for c in gdf.columns]
     gdf.columns = [c.split("_sum")[0] for c in gdf.columns]
-    if uid=='tmp_ID_EE':
-        gdf.drop('tmp_ID_EE',axis=1,inplace=True)
+    gdf.drop('tmp_ID_EE',axis=1,inplace=True)
     gdf.to_file(out_file, layer='stats', driver="GPKG", mode="w")
     if verbose:
         print("Finished!")
@@ -621,7 +620,7 @@ if __name__ == '__main__':
                             print(f"{sys.argv[n+1]} is an invalid path for output directory!",file=sys.stderr)
                     if "i" in a:
                         flag = True
-                        if sys.argv[n+1][0] == "[" and sys.argv[n+1][-1] == "]":
+                        if sys.argv[n+1][0] == "[" and sys.argv[n+1][-1] == "]" and sys.argv[n+1] != "[]":
                             if sys.argv[n+3][0] == "[" and sys.argv[n+3][-1] == "]":
                                 if os.path.isdir(sys.argv[n+2]):
                                     toRemove.append(sys.argv[n+1])
