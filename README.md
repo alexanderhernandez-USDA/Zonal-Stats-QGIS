@@ -34,7 +34,6 @@ Once the calculation/extraction type has been selected, you can then select addi
 - Polygon generation - If your input geopackage has points, select the option for using points. An additional checkbox will appear for creating buffers around the points. Check this box, and you can then choose between a square or circle buffer, and set the buffer size in meters.
 - Save intermediate calculations - When calculating indices, the calculations are temporarily saved to disk. Selecting this option will let you choose a folder to save these intermediate calculations to. They will be saved in a multilayer raster by date.
 - Threading - By default, only one thread is used for processing. If you would like to use more threads/cores for processing, you can set the number of threads to use.
-- Set UID - By default, the UID 'id' is used for the input geopackage. If your input geopackage doesn't have a field/column named 'id', you can specify the name of your unique identifer column/field.
 
 
 After setting all the options and inputs as desired, you can then hit 'Run'. This will start the processing. It will run in the background (you should see a new task start, an a loading bar should appear in the bottom bar of QGIS), and when it is finished the loading bar in the plugin will go to 100%. A popup banner will likely appear as well to indicate that the processing task has finished.
