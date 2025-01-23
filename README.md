@@ -2,6 +2,9 @@
 QGIS plugin for performing zonal statistics, volume calculation, and vegetation index calculation
 
 
+# Important Note
+This QGIS plugin is still under experimental development and testing, as a result it is not unlikely that errors may occur when trying to install or run the plugin. Please feel free to report any errors on the issues page.
+
 ## Installation
 
 ### Prerequisites
