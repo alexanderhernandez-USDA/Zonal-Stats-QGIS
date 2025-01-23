@@ -3,13 +3,20 @@ QGIS plugin for performing zonal statistics, volume calculation, and vegetation 
 
 
 # Important Note
-This QGIS plugin is still under experimental development and testing, as a result it is not unlikely that errors may occur when trying to install or run the plugin. Please feel free to report any errors on the issues page.
+This QGIS plugin is still under experimental development and testing, as a result it is not unlikely that errors may occur when trying to install or run the plugin. Please feel free to report any errors on the issues page. So far, it has been tested on the following platforms and versions:
+|Platform|QGIS Version|Python version|
+|:---|:---|:---|
+|Linux (RedHat) | 3.30.0rc | 3.10 |
+|Linux (Rocky) | 3.30.0 | 3.10 |
+|Linux (Ubuntu) | 3.26.3 | 3.9 |
+|Windows 11 | 3.32.3 | 3.9 |
+|Windows 11 | 3.34.14 | 3.12 |
 
 ## Installation
 
 ### Prerequisites
 Windows: You will need at least QGIS version 3.26  
-Mac and Linux: You will need to have Python >= 3.9 on your system and in the PATH
+Mac and Linux: You will need to have Python >= 3.9 on your system and in the PATH, and at least QGIS version 3.26
 
 ### From the zip file
 Download the zonal_stats.zip file in this repository. In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. Here, select the zip file you downloaded and click 'Install Plugin'. Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin. There may be delay as the package run some installation steps, which may take a few minutes.
