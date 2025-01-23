@@ -288,6 +288,16 @@ class ZonalStats(QObject):
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        import inspect
+        curframe = inspect.currentframe()
+        frames = inspect.getouterframes(curframe)
+        for frame in frames:
+            if frame.function == "uninstallPlugin":
+                if platform.system() == "Linux" or platform.system() == "Darwin":
+                    bin_folder = os.path.dirname(self.exec)
+                    for i in os.listdir(bin_folder):
+                        if "python" in str(i).lower():
+                            os.unlink(os.path.join(bin_folder,i))
         for action in self.actions:
             self.iface.removePluginMenu(
                 self.tr(u'&Zonal Statistics'),

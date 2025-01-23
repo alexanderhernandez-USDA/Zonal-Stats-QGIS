@@ -27,17 +27,22 @@
 import os, platform, subprocess, sys
 
 def plugin_prep():
+    temp = os.getcwd()
     
     if platform.system() == "Windows":
         import pip
         installer = "install.bat"
-        qgis_py_path = os.path.join(sys.executable.split("bin")[0],"apps\\Python39\\python.exe")
+        bin_parent = sys.executable.split("bin")[0]
+        py_version = [p for p in os.listdir(os.path.join(bin_parent,"apps")) if "Python3" in p][0]
+        qgis_py_path = os.path.join(bin_parent,"apps",py_version,"python.exe")
         installer = os.path.join(os.path.dirname(__file__), installer)
         os.chdir(os.path.dirname(__file__))
-        print(subprocess.run([installer,qgis_py_path], capture_output=True))
-        #print(os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"))
-        #print(os.path.join(os.getcwd(),"requirements.txt"))
         with open('install_err.log','w') as f:
+            out = str(subprocess.run([installer,qgis_py_path], capture_output=True))
+            print(out)
+            f.write(out)
+            #print(os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"))
+            #print(os.path.join(os.getcwd(),"requirements.txt"))
             sys.stderr = f
             pip.main(["install","-t",os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"),"-r",os.path.join(os.getcwd(),"requirements.txt")])
     if platform.system() == "Linux" or platform.system() == "Darwin":
@@ -45,6 +50,8 @@ def plugin_prep():
         installer = os.path.join(os.path.dirname(__file__), installer)
         os.chdir(os.path.dirname(__file__))
         print(subprocess.run(["bash",installer], capture_output=True))
+    
+    os.chdir(temp)
 
 
 
@@ -60,7 +67,7 @@ def classFactory(iface):  # pylint: disable=invalid-name
     if not os.path.exists(os.path.join(os.path.dirname(__file__),"zsenv")):
         plugin_prep()
 
-    os.chdir(os.path.dirname(__file__))
+    #os.chdir(os.path.dirname(__file__))
     #print(os.getcwd())
     from .zonal_stats import ZonalStats
     return ZonalStats(iface)
