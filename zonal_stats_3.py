@@ -526,13 +526,22 @@ def zonal_stats(to_run,gpkg,out_file):
         open_pool = threads>(len(to_run)*2)
         total_images = sum([len(os.listdir(r['path'])) for r in to_run])
         wide_open = threads > ((len(to_run)*2)+(total_images*2))
-        res = pool.starmap(process_run,[(proc_dir,r,gdf,pool,open_pool,wide_open) for r in to_run])
-        pool.close()
-        pool.join()
-        if "error" in res:
-            print("Processing failed for some images, please correct errors and try again!",file=sys.stderr)
+        try:
+            res = pool.starmap(process_run,[(proc_dir,r,gdf,pool,open_pool,wide_open) for r in to_run])
+            pool.close()
+            pool.join()
+            if "error" in res:
+                print("Processing failed for some images, please correct errors and try again!",file=sys.stderr)
+                shutil.rmtree(proc_dir)
+                sys.exit(1)
+        except Exception as e:
+            e = str(e)
+            if "Error creating Transformer from CRS" in e:
+                print("Processing failed: It seems your geopackage may be corrupted or contain coordinates outside of its CRS!",file=sys.stderr)
+            print(e,file=sys.stderr)
             shutil.rmtree(proc_dir)
             sys.exit(1)
+            
 
     # Run exact extract and get zonal statistics for generated images, or get point values and/or output rasters
     with multiprocessing.Manager() as manager:

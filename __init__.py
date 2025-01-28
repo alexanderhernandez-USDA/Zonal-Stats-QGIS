@@ -25,6 +25,7 @@
 
 
 import os, platform, subprocess, sys
+from contextlib import redirect_stderr
 
 def plugin_prep():
     temp = os.getcwd()
@@ -43,13 +44,17 @@ def plugin_prep():
             f.write(out)
             #print(os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"))
             #print(os.path.join(os.getcwd(),"requirements.txt"))
-            sys.stderr = f
-            pip.main(["install","-t",os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"),"-r",os.path.join(os.getcwd(),"requirements.txt")])
+            #sys.stderr = f
+            with redirect_stderr(f):
+                pip.main(["install","-t",os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"),"-r",os.path.join(os.getcwd(),"requirements.txt")])
     if platform.system() == "Linux" or platform.system() == "Darwin":
         installer = "install.sh"
         installer = os.path.join(os.path.dirname(__file__), installer)
         os.chdir(os.path.dirname(__file__))
-        print(subprocess.run(["bash",installer], capture_output=True))
+        temp = subprocess.run(["bash",installer], capture_output=True)
+        print(temp)
+        with open('install_err.log','w') as f:
+            f.write(str(temp))
     
     os.chdir(temp)
 
