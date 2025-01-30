@@ -15,6 +15,7 @@ from exactextract import exact_extract
 import math
 import warnings
 
+
 # Help screen
 helpScreen = """Usage: python3 zonal_stats_3.py [OPTIONS] <index_flag> <index_requirements> input_file.gpkg output_file.gpkg
 
@@ -86,6 +87,7 @@ polygons = True
 buffer = None
 buffer_size = 0
 script_dir = os.path.dirname(os.path.realpath(__file__))
+os.chdir(script_dir)
 output = None
 aoi_file = None
 

@@ -38,13 +38,12 @@ def plugin_prep():
         qgis_py_path = os.path.join(bin_parent,"apps",py_version,"python.exe")
         installer = os.path.join(os.path.dirname(__file__), installer)
         os.chdir(os.path.dirname(__file__))
+        
         with open('install_err.log','w') as f:
             out = str(subprocess.run([installer,qgis_py_path], capture_output=True))
-            print(out)
             f.write(str(out))
-            #print(os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"))
-            #print(os.path.join(os.getcwd(),"requirements.txt"))
-            #sys.stderr = f
+            if sys.stdout is None:
+                sys.stdout = f
             with redirect_stderr(f):
                 pip.main(["install","-t",os.path.join(os.getcwd(),"zsenv\\Lib\\site-packages"),"-r",os.path.join(os.getcwd(),"requirements.txt")])
     if platform.system() == "Linux" or platform.system() == "Darwin":
