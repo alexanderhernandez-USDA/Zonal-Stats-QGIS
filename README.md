@@ -11,6 +11,7 @@ This QGIS plugin is still under experimental development and testing, as a resul
 |Linux (Ubuntu) | 3.26.3 | 3.9 |
 |Windows 11 | 3.32.3 | 3.9 |
 |Windows 11 | 3.34.14 | 3.12 |
+|Windows 11 | 3.30.0 | 3.9 |
 
 ## Installation
 
