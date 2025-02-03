@@ -50,7 +50,13 @@ You are done!
 
 
 ## Usage
-Once the plugin has been installed, you can open it by clicking on its icon. The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. Please verify that these images contain dates in their filenames. Dates can be delimited using ., _, or -. The following are three vaild formats:
+Once the plugin has been installed, you can open it by clicking on its icon. 
+![icon](https://github.com/user-attachments/assets/40b5b7d4-a701-43f2-85cf-19a2063cb956)
+
+
+
+
+The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. Please verify that these images contain dates in their filenames. Dates can be delimited using ., _, or -. The following are three vaild formats:
 
 YYYY_MM_DD  
 DD.MM.YYYY  
