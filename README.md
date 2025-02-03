@@ -1,5 +1,5 @@
 # Zonal-Stats-QGIS
-QGIS plugin for performing zonal statistics, volume calculation, and vegetation index calculation
+Quantum GIS (QGIS) plugin to perform several tasks that facilitate geospatial predictive modeling from multispectral datasets. The plugin can be used to extract spectral band values, compute vegetation indices such as NDVI, NDRE from the spectral bands as well as estimating volumes from digital surface models (DSMs).   reducing and others and then such as computafor performing zonal statistics, volume calculation, and vegetation index calculation
 
 
 # Important Note
