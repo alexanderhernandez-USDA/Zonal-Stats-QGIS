@@ -19,10 +19,13 @@ This QGIS plugin is still under experimental development and testing, as a resul
 Windows: You will need at least QGIS version 3.26  
 Mac and Linux: You will need to have Python >= 3.9 on your system and in the PATH, and at least QGIS version 3.26
 
-### From the zip file
+### Download the zip file
 Download the zonal_stats.zip file in this repository. The zip file can be accesed directly from:
+https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS/blob/main/zonal_stats.zip
 
+### Instalation in Quantum GIS
 In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. Here, select the zip file you downloaded and click 'Install Plugin'. Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin. There may be delay as the package run some installation steps, which may take a few minutes.
+![image](https://github.com/user-attachments/assets/26105382-c1d3-48fa-9aac-c5657b822bc2)
 
 
 
