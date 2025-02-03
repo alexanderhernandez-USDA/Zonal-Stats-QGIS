@@ -20,7 +20,9 @@ Windows: You will need at least QGIS version 3.26
 Mac and Linux: You will need to have Python >= 3.9 on your system and in the PATH, and at least QGIS version 3.26
 
 ### From the zip file
-Download the zonal_stats.zip file in this repository. In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. Here, select the zip file you downloaded and click 'Install Plugin'. Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin. There may be delay as the package run some installation steps, which may take a few minutes.
+Download the zonal_stats.zip file in this repository. The zip file can be accesed directly from:
+
+In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. Here, select the zip file you downloaded and click 'Install Plugin'. Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin. There may be delay as the package run some installation steps, which may take a few minutes.
 
 
 
