@@ -24,8 +24,16 @@ Download the zonal_stats.zip file in this repository. The zip file can be accese
 https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS/blob/main/zonal_stats.zip
 
 ### Instalation in Quantum GIS
-In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. Here, select the zip file you downloaded and click 'Install Plugin'. Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin. There may be delay as the package run some installation steps, which may take a few minutes.
-![image](https://github.com/user-attachments/assets/26105382-c1d3-48fa-9aac-c5657b822bc2)
+In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. 
+![image](https://github.com/user-attachments/assets/cc7cd9b3-e39d-497a-a7a1-ea2a9c0eaba9)
+
+
+
+
+
+
+Here, select the zip file you downloaded and click 'Install Plugin'. Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin. There may be delay as the package run some installation steps, which may take a few minutes.
+
 
 
 
