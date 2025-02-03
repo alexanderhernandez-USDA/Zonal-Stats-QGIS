@@ -51,8 +51,6 @@ You are done!
 
 ## Usage
 Once the plugin has been installed, you can open it by clicking on its icon. 
-![icon](https://github.com/user-attachments/assets/40b5b7d4-a701-43f2-85cf-19a2063cb956)
-
 <img width="76" alt="icon" src="https://github.com/user-attachments/assets/826d45ff-26be-4f26-8b28-dcbc1756fb30" />
 
 
