@@ -111,7 +111,13 @@ We then select the vegetation indices that we need - and in this case we had dec
 
 ![image](https://github.com/user-attachments/assets/338c6005-cca6-49f2-aaf4-914f466115ce)
 
+If we open the output geopackage on QGIS we can see that now we have rectangular geometries around each point.
 
+![image](https://github.com/user-attachments/assets/27a9e88e-0256-4331-8f31-d86e7820bc69)
+
+And if we open the atribute table for the output geopackage (i.e. Site_points_VIs_Boxes.gpkg) you will find the calculated zonal statistics (median value for all the pixels that are contained within each polygon geometry) for each one of the dates that we are analyzing.
+
+![image](https://github.com/user-attachments/assets/a73a8d60-5bfc-45d0-a2c7-17f4c04e382d)
 
 
 
