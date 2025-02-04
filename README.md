@@ -50,6 +50,11 @@ You are done!
 
 
 ## Usage
+## Sample data provided
+You can download some sample data (i.e. RGB orthophotos and a point geometry geopackage) so that you can test the functionality of the plugin by yourself. The data can be downloaded from the following link:
+
+
+
 Once the plugin has been installed, you can open it by clicking on its icon. 
 <img width="76" alt="icon" src="https://github.com/user-attachments/assets/826d45ff-26be-4f26-8b28-dcbc1756fb30" />
 
