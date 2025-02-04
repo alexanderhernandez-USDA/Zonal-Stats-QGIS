@@ -111,6 +111,11 @@ Observe that we first click on the Calculation Type dropbox and select **Index C
 
 ![409355737-37dfc616-64cb-4cfc-82cb-fd08166092ae](https://github.com/user-attachments/assets/2a928490-90c9-4b5d-a1e7-c910b49742e7)
 
+The following RGB-based vegetation indices are currently available in the plugin:
+
+![image](https://github.com/user-attachments/assets/656c3227-84d6-46e4-843c-3f7dff670d2b)
+
+
 We then select the vegetation indices that we need - and in this case we had decided to generate rectangular boxes around each point geometry
 
 ![409356263-338c6005-cca6-49f2-aaf4-914f466115ce](https://github.com/user-attachments/assets/ed3e7b23-f4d7-4f28-9957-9f085901b0cf)
