@@ -4,12 +4,12 @@ Quantum GIS (QGIS) plugin to perform several tasks that facilitate geospatial pr
 # Packages/Environment
 Currently, the most recent version of the plugin uses the following major python packages (not including those part of the default Python installation)
 
-Geopandas (and therefore Pandas): https://geopandas.org/
-Rasterio: https://rasterio.readthedocs.io/
-Exactextract: https://github.com/isciences/exactextract
-Shapely: https://shapely.readthedocs.io/en/stable/manual.html
-Scikit-image (skimage): https://scikit-image.org/
-Numpy: https://numpy.org/
+* Geopandas (and therefore Pandas): https://geopandas.org/
+* Rasterio: https://rasterio.readthedocs.io/
+* Exactextract: https://github.com/isciences/exactextract
+* Shapely: https://shapely.readthedocs.io/en/stable/manual.html
+* Scikit-image (skimage): https://scikit-image.org/
+* Numpy: https://numpy.org/
 
 # Important Note
 This QGIS plugin is still under experimental development and testing, as a result it is not unlikely that errors may occur when trying to install or run the plugin. Please feel free to report any errors on the issues page. So far, it has been tested on the following platforms and versions:
