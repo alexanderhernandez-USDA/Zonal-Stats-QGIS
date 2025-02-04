@@ -89,8 +89,6 @@ red,green,blue,rededge,nir
 
 ![409349033-25237ed3-9c4f-42e3-9d5e-9f9d2d0aa0e1 (1)](https://github.com/user-attachments/assets/b13e939e-fc9e-4b57-b98a-714d207ad0a0)
 
-![409349033-25237ed3-9c4f-42e3-9d5e-9f9d2d0aa0e1](https://github.com/user-attachments/assets/30be1ba5-2694-4e64-8582-b9c512539db4)
-
 
 **Click Run and once it shows 100% click Close**
 
