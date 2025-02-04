@@ -25,7 +25,6 @@ https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS/blob/main/zonal_stat
 
 ### Instalation in Quantum GIS
 In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to 'Install from ZIP'. 
-![image](https://github.com/user-attachments/assets/cc7cd9b3-e39d-497a-a7a1-ea2a9c0eaba9)
 
 ![409284208-cc7cd9b3-e39d-497a-a7a1-ea2a9c0eaba9](https://github.com/user-attachments/assets/16eea8e6-6928-48f1-831f-ecbbef116f88)
 
