@@ -73,8 +73,8 @@ Once the plugin has been installed, you can open it by clicking on its icon.
 
 
 The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. 
+![image](https://github.com/user-attachments/assets/786c31f3-7f28-4efc-9b40-bbab2b811f86)
 
-![image](https://github.com/user-attachments/assets/393eda5d-dee1-411b-85da-78dd4dfe01d5)
 
 
 
