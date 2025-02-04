@@ -75,7 +75,7 @@ Once the plugin has been installed, you can open it by clicking on its icon.
 The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. 
 
 After selecting your input folder, input geopackage, and output geopackage, you can then select the calculation/extraction type. There are four options:
-1. Raw Extraction - Gets raw values from images
+1. Raw Extraction - Gets raw values from images - i.e. extract the pixel value at each of the sample locations 
 2. Volume Calculation - Calculates volumes for each polygon in geopackage (input images should be DSM/DEM rasters)
 3. Volume Calculation with Reference DSM - Calculates volumes for each polygon in geopackage by using a reference DSM/DEM to calculate heights
 4. Index Calculations - Allows for a selection of vegetation indices to be calculated and extracted
@@ -94,8 +94,9 @@ If we open the output geopackage in QGIS and open the attribute table we can see
 
 ![image](https://github.com/user-attachments/assets/c596356d-dd1c-48b7-8c78-a6629e174f94)
 
+**Now imagine that you want to create polygon geometries around each one of the point geometries. The plugin allows you to create circular or rectangular polygons. Let's try the option to create circular buffers of 55 centimeters (0.55 m) and then extract the median value within each one of the polygon geometries**
 
-
+![image](https://github.com/user-attachments/assets/4b37e9ff-8e05-4bef-b357-0af988212fa1)
 
 
 
