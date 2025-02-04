@@ -143,6 +143,14 @@ And if we open the atribute table for the output geopackage (i.e. Site_points_VI
 
 ![image](https://github.com/user-attachments/assets/77cf81e1-7ce6-4421-8343-a0fc21ba14f8)
 
+Following the previous instructions - change the input folder to the folder containing the sample DSMs, select the point geometries geopackage and define a name for the output geopackage. In addition, change the calculation type to "Volume Calculation". Then make sure to create rectangular buffer geometries around each point. See following figure:
+
+![image](https://github.com/user-attachments/assets/3dc47ff4-0af5-40e3-9d3a-710cff4a4f6a)
+
+Once the calculation has been done, you can open the output geopackage and check the attribute table:
+**The output values are the volume in cubic meters**
+
+![image](https://github.com/user-attachments/assets/9140edbd-2319-41c8-9655-a46ff5d44733)
 
 Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
 
