@@ -35,6 +35,8 @@ In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to
 Here, select the zip file you downloaded and click 'Install Plugin'. You will get a security warning about installing plugins from "untrusted sources". You can click "Yes" to continue with the installation process.
 ![image](https://github.com/user-attachments/assets/b6d5a164-9cf1-463f-a00e-7cfda87e7b25)
 
+![409285614-b6d5a164-9cf1-463f-a00e-7cfda87e7b25](https://github.com/user-attachments/assets/c05d0d76-b406-4023-a9c7-83b284a8bff4)
+
 
 Once it has finished, go to the 'Installed' tab, and uncheck and recheck the checkbox for the Zonal Statistics plugin.
 ![image](https://github.com/user-attachments/assets/c71baf94-af77-487e-9a64-b9de737e9a1b)
