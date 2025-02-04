@@ -84,11 +84,11 @@ The Raw Extraction and Index Calculations options require that the image band or
 
 red,green,blue,rededge,nir
 
-**Let's take a look at the first option:**
+**Let's take a look at the first option - where we: a) define the folder containing the images, b) select the input geopackage and c: define a name for the output geopackage:**
 
 ![image](https://github.com/user-attachments/assets/25237ed3-9c4f-42e3-9d5e-9f9d2d0aa0e1)
 
-
+**Click Run and once it shows 100% click Close**
 
 Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
 
