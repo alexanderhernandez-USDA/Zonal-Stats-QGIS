@@ -28,7 +28,7 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QFileInfo, Qt
 from qgis.PyQt.QtGui import QIcon, QPixmap, QGuiApplication
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QGraphicsScene, QFrame, QGraphicsPixmapItem, QListWidget, QListWidgetItem, QApplication
-import subprocess, platform
+import subprocess, platform, re
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -192,7 +192,18 @@ class ZonalStats(QObject):
                 desc = i.split(":")[-1].strip()
             elif "calc" in i:
                 calc = i.split(':')[-1].strip()
-                vegIndices.append(f"{name}:: {desc}")
+                reqBands = []
+                if re.search("([^a-zA-Z]r[^a-zA-Z]|^r[^a-zA-Z]|[^a-zA-Z]r$|^r$)",calc):
+                    reqBands.append("red")
+                if re.search("([^a-zA-Z]g[^a-zA-Z]|^g[^a-zA-Z]|[^a-zA-Z]g$|^g$)",calc):
+                    reqBands.append("green")
+                if re.search("([^a-zA-Z]b[^a-zA-Z]|^b[^a-zA-Z]|[^a-zA-Z]b$|^b$)",calc):
+                    reqBands.append("blue")
+                if re.search("([^a-zA-Z]re[^a-zA-Z]|^re[^a-zA-Z]|[^a-zA-Z]re$|^re$)",calc):
+                    reqBands.append("rededge")
+                if re.search("([^a-zA-Z]n[^a-zA-Z]|^n[^a-zA-Z]|[^a-zA-Z]n$|^n$)",calc):
+                    reqBands.append("nir")
+                vegIndices.append([f"{name}:: {desc}",reqBands])
         return vegIndices
 
     def initGui(self):
@@ -246,7 +257,7 @@ class ZonalStats(QObject):
 
         for i in self.vegIndices:
             item = QListWidgetItem()
-            item.setText(QApplication.translate("Dialog", str(i), None))
+            item.setText(QApplication.translate("Dialog", str(i[0]), None))
             item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
             item.setCheckState(QtCore.Qt.Unchecked)
             self.dlg.input_indices_list.addItem(item)
@@ -437,7 +448,34 @@ class ZonalStats(QObject):
         if self.dlg.in_band_order.text() == "":
             self.band_order = "red,green,blue,rededge,nir"
         else:
-            self.band_order = self.dlg.in_band_order.text()
+            self.band_order = self.dlg.in_band_order.text().lower()
+        #if self.calc == "INDICES":
+        bands = self.band_order.split(",")
+        for n,i in enumerate(self.vegIndices):
+            has_bands = True
+            for b in i[1]:
+                if b not in bands:
+                    has_bands = False
+                    break
+            item = self.dlg.input_indices_list.item(n)
+            if has_bands:
+                item.setHidden(False)
+            else:
+                item.setHidden(True)
+        
+        can_all = True
+        for b in ["red","green","blue","rededge","nir"]:
+            if b not in bands:
+                can_all = False
+                break
+
+        if can_all:
+            self.dlg.run_all.setEnabled(True)
+        else:
+            self.dlg.run_all.setEnabled(False)
+            self.dlg.run_all.setChecked(False)
+            self.dlg.input_indices_list.show()
+            self.check_index_items()
 
     def check_index_items(self):
         self.indices = []

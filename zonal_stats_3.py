@@ -7,6 +7,7 @@ import numpy as np
 import multiprocessing
 import multiprocessing.pool
 from shapely import unary_union
+from shapely.geometry import box
 from skimage import io
 from skimage.color import rgb2hsv
 from exactextract import exact_extract
@@ -23,7 +24,7 @@ Reads all tif files in an input directory, performs specified index calculations
 
 Please note that at least one index option (-a, -i, -n, -v or -V) and its corresponding input directory must be used in order to run
 
-All non-volumetric calculations and extractions require band order to be specified as well. The default band order is [red,green,blue,redege,nir], and you can
+All non-volumetric calculations and extractions require band order to be specified as well. The default band order is [red,green,blue,rededge,nir], and you can
 use the default by using empty square brackets, like [], when specifying band order.
 
 Options
@@ -36,6 +37,7 @@ Global Options
     -S <distance>   Use a geopackage that has points instead of polygons, and specify a distance in meters for a square buffer around the point
     -C <distance>   Use a geopackage that has points instead of polygons, and specify a distance in meters for a circular buffer around the point
     -o <directory>  Generate multi-layer tifs containing intermediate calculation/extraction data by date in the specified output directory
+    -O <directory> <AOI_gpkg>   Generate multi-layer tifs with intermediate data in specified directory, clipping by polygon in AOI_gpkg geopackage
 
 Index / Calculation options : Specify a directory (and band order if not a volume calc) per flag. Multiple index/calculation options may be used in a single command
     -i [<indices>] <directory> [<bands>]    Pass a list of vegetation indices to be run, in format [index1,index2,...] (try -l option to see available indices)
@@ -45,16 +47,16 @@ Index / Calculation options : Specify a directory (and band order if not a volum
     -V <directory> <second_dsm.tif>      Specify a path to a folder to run volume calculation on using a secondary DSM to calculate heights, the second DSM should be specified after the folder name.
 
 Examples:
-python3 zonal_stats_3.py -i [BI,SCI,GLI] flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg       #Runs with indices BI, SCI, and GLI
-python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg             #Runs with all indices
-python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg    #Runs all indices with band order red, green, blue, NIR, RedEdge
+python3 zonal_stats_3.py -i [BI,SCI,GLI] flight/rasters/ [red,green,blue,rededge,nir] flight/package.gpkg zonal_stats.gpkg       #Runs with indices BI, SCI, and GLI
+python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,rededge,nir] flight/package.gpkg zonal_stats.gpkg             #Runs with all indices
+python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,rededge,nir] flight/package.gpkg zonal_stats.gpkg    #Runs all indices with band order red, green, blue, NIR, RedEdge
 python3 zonal_stats_3.py -n flight/thermals/ [swir] flight/rasters/ flight/package.gpkg zonal_stats.gpkg   #Runs zonal stats on the thermals directory getting raw values
 python3 zonal_stats_3.py -v flight/dsms/ flight/package.gpkg zonal_stats.gpkg                       # Performs volume calculation using a plane average
 python3 zonal_stats_3.py -V flight/dsms/ flight/ref_dsm.tif flight/package.gpkg zonal_stats.gpkg    # Performs volume calculation using a reference DSM raster
 python3 zonal_stats_3.py -t 12 -v flight/dsms/ flight/package.gpkg zonal_stats.gpkg                 # Uses 12 threads to perform volume calculation
-python3 zonal_stats_3.py -p -i [BI] flight/rasters/ [red,green,blue,redege,nir] flight/point_package.gpkg point_stats.gpkg      # Gets values at each point of a point-based geopackage after BI calculation
-python3 zonal_stats_3.py -C 1 -i [BI] flight/rasters/ [red,green,blue,redege,nir] flight/point_package.gpkg circle_stats.gpkg   # Makes circular buffers with a 1 meter radius from point-based geopackage and performs BI calculation and then gets stats for each buffer
-python3 zonal_stats_3.py -S 1 -i [BI] flight/rasters/ [red,green,blue,redege,nir] flight/point_package.gpkg square_stats.gpkg   # Makes square buffers with a 1 meter radius from point-based geopackage and performs BI calculation and then gets stats for each buffer
+python3 zonal_stats_3.py -p -i [BI] flight/rasters/ [red,green,blue,rededge,nir] flight/point_package.gpkg point_stats.gpkg      # Gets values at each point of a point-based geopackage after BI calculation
+python3 zonal_stats_3.py -C 1 -i [BI] flight/rasters/ [red,green,blue,rededge,nir] flight/point_package.gpkg circle_stats.gpkg   # Makes circular buffers with a 1 meter radius from point-based geopackage and performs BI calculation and then gets stats for each buffer
+python3 zonal_stats_3.py -S 1 -i [BI] flight/rasters/ [red,green,blue,rededge,nir] flight/point_package.gpkg square_stats.gpkg   # Makes square buffers with a 1 meter radius from point-based geopackage and performs BI calculation and then gets stats for each buffer
 python3 zonal_stats_3.py -n flight/thermals/ [swir] -i [BI] flight/rasters/ [] flight/package.gpkg output.gpkg  # Get raw values from SWIR images and gets the BI index from images in rasters with default band order
 python3 zonal_stats_3.py -o flight/outputs/ -i [BI,SCI,GLI] flight/raster/ [] flight/package.gpkg output.gpkg  # Get BI, SCI and GLI indices and output rasters with calculation data in flight/outputs/
 """
@@ -100,7 +102,7 @@ def get_band(raster,bands,band):
         return ds[bands.index(band)],ras.meta.copy()
 
 # Write processing tif from raster data for an index, copies over original tags as well
-def write_tif(proc_dir,data,t,in_dir,tName,i):
+def write_tif(proc_dir,data,tName,i):
     if data is None:
         print(f"Error in processing {tName}_{i}!",file=sys.stderr)
         return "ERROR"
@@ -115,7 +117,7 @@ def write_tif(proc_dir,data,t,in_dir,tName,i):
         dst.write_band(1,data)
 
 # Run all standard vegetation indices
-def run_all(proc_dir,t,in_dir,tName,bands,r=None,gdf=None,pool=None,wide_open=False):
+def run_all(proc_dir,t,in_dir,tName,bands,r=None,pool=None,wide_open=False):
     if len(indexDict.keys()) < 5:
         print("No indices to run on! Likely missing indices.conf!",file=sys.stderr)
         return
@@ -123,7 +125,7 @@ def run_all(proc_dir,t,in_dir,tName,bands,r=None,gdf=None,pool=None,wide_open=Fa
         pool.starmap(sub_process_image,[(proc_dir,i,in_dir,t,bands,tName) for i in list(indexDict.keys())[4:]])
     else:
         for i in list(indexDict.keys())[4:]:
-            res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+            res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),tName,i)
             if res=="ERROR":
                 return 'ERROR'
 
@@ -131,7 +133,7 @@ def run_all(proc_dir,t,in_dir,tName,bands,r=None,gdf=None,pool=None,wide_open=Fa
 def run_list(proc_dir,t,in_dir,tName,bands,indexFlags):
     for i in indexFlags:
         if i in indexDict:
-            res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+            res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),tName,i)
             if res=="ERROR":
                 return 'ERROR'
         else:
@@ -156,20 +158,21 @@ def calc_DGCI(raster,bands):
     return dgci,out_meta
 
 # Run DGCI (wrapper for calc_DGCI)
-def run_dgci(proc_dir,t,in_dir,tName,bands,r,gdf):
-    res = write_tif(proc_dir,calc_DGCI(os.path.join(in_dir,t),bands),t,in_dir,tName,"DGCI")
+def run_dgci(proc_dir,t,in_dir,tName,bands,r):
+    res = write_tif(proc_dir,calc_DGCI(os.path.join(in_dir,t),bands),tName,"DGCI")
     if res=='ERROR':
         return 'ERROR'
 
 # Make a copy of image for raw data statistics
-def run_raw(proc_dir,t,in_dir,tName,bands,r,gdf):
+def run_raw(proc_dir,t,in_dir,tName,bands,r):
     for b in bands:
-        res = write_tif(proc_dir,get_band(os.path.join(in_dir,t),bands,b),t,in_dir,tName,f"{b}")
+        res = write_tif(proc_dir,get_band(os.path.join(in_dir,t),bands,b),tName,f"{b}")
         if res=='ERROR':
             return 'ERROR'
 
 # Run volume calculation
-def calc_volume(proc_dir,t,in_dir,tName,bands,r,gdf):
+def calc_volume(proc_dir,t,in_dir,tName,bands,r):
+    gdf = gpd.read_file(os.path.join(proc_dir,f"{'.'.join(t.split('.')[:-1])}.gpkg"))
     dsm_raw = rasterio.open(os.path.join(in_dir,t))
     dsm_data = dsm_raw.read(1)
     if r['ref'] == "NONE":
@@ -283,7 +286,7 @@ read_config(os.path.join(script_dir,"indices.conf"))
 # sub function for image processing, used for multiprocessing
 def sub_process_image(proc_dir,i,in_dir,t,bands,tName):
     if i in indexDict:
-        res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),t,in_dir,tName,i)
+        res = write_tif(proc_dir,indexDict[i](os.path.join(in_dir,t),bands),tName,i)
         if res=='ERROR':
             print(f"Failed to process index: {i} due to previous errors!",file=sys.stderr)
             return "ERROR"
@@ -292,7 +295,7 @@ def sub_process_image(proc_dir,i,in_dir,t,bands,tName):
     return i
 
 # Main image processing function to be called as a process from zonal_stats function
-def process_image(proc_dir,r,t,in_dir,tName,index_list,gdf,bands,pool=None,wide_open=False):
+def process_image(proc_dir,r,t,in_dir,tName,index_list,bands,pool=None,wide_open=False):
     if not os.path.exists(os.path.join(proc_dir,tName)):
         try:
             os.mkdir(os.path.join(proc_dir,tName))
@@ -305,9 +308,9 @@ def process_image(proc_dir,r,t,in_dir,tName,index_list,gdf,bands,pool=None,wide_
             res = run_list(proc_dir,t,in_dir,tName,bands,index_list)
     else:
         if r['indices'] == 'ALL' and type(pool) != type(None) and wide_open:
-            res = run_all(proc_dir,t,in_dir,tName,bands,None,None,pool,wide_open)
+            res = run_all(proc_dir,t,in_dir,tName,bands,None,pool,wide_open)
         else:
-            res = indexDict[r['indices']](proc_dir,t,in_dir,tName,bands,r,gdf)
+            res = indexDict[r['indices']](proc_dir,t,in_dir,tName,bands,r)
     if res is not None and "ERROR" in res:
         return "ERROR"
 
@@ -363,7 +366,7 @@ def get_point_values(proc_dir,tName,gdf,pool,open_pool):
     return df
 
 # Create multilayer tifs by date
-def get_multilayer_tif(proc_dir,subs,in_gpkg):
+def get_multilayer_tif(proc_dir,subs,aoi_file=None):
     total = 0
     layers = []
     names = []
@@ -389,30 +392,22 @@ def get_multilayer_tif(proc_dir,subs,in_gpkg):
         if "Undefined geographic SRS" in str(gpkg.crs):
             print("Area of Interest gpkg has no CRS! Not clipping by AOI!")
             return
-    else:
-        gpkg = gpd.read_file(in_gpkg)
-        gpkg['temp'] = 0
-        gpkg = gpkg.dissolve(by='temp')
-        gpkg['geometry'] = gpkg['geometry'].envelope
+        with rasterio.open(os.path.join(output,f"{date}_ZS_out.tif"),"r") as src:
+            vector = gpkg.to_crs(src.crs)
+            out_image, out_transform = mask(src,vector.geometry,crop=True,all_touched=True)
+            out_meta = src.meta.copy()
+        
+        out_meta.update({"height":out_image.shape[1], # height starts with shape[1]
+            "width":out_image.shape[2], # width starts with shape[2]
+            "transform":out_transform})
 
-    with rasterio.open(os.path.join(output,f"{date}_ZS_out.tif"),"r") as src:
-        vector = gpkg.to_crs(src.crs)
-        out_image, out_transform = mask(src,vector.geometry,crop=True,all_touched=True)
-        out_meta = src.meta.copy()
-    
-    out_meta.update({"height":out_image.shape[1], # height starts with shape[1]
-        "width":out_image.shape[2], # width starts with shape[2]
-        "transform":out_transform})
-
-    with rasterio.open(os.path.join(output,f"{date}_ZS_out.tif"),"w",**out_meta) as dst:
-        dst.write(out_image)
-        dst.descriptions = tuple(names)
+        with rasterio.open(os.path.join(output,f"{date}_ZS_out.tif"),"w",**out_meta) as dst:
+            dst.write(out_image)
+            dst.descriptions = tuple(names)
 
 
 def pre_clip(img_dir,proc_dir,gpkg,band_len):
     gpkg['temp'] = 0
-    gpkg = gpkg.dissolve(by='temp')
-    gpkg['geometry'] = gpkg['geometry'].envelope
     tifs = os.listdir(img_dir)
     tifs = [t for t in tifs if t.split('.')[-1].lower() in valid_types]
     out_dir = os.path.join(proc_dir,f".{os.path.basename(os.path.abspath(img_dir))}_clips")
@@ -424,6 +419,13 @@ def pre_clip(img_dir,proc_dir,gpkg,band_len):
     for t in tifs:
         with rasterio.open(os.path.join(img_dir,t)) as src:
             vector = gpkg.to_crs(src.crs)
+            bounds = src.bounds
+            geom = box(*bounds)
+            intersect = vector.intersects(geom)
+            vector = vector[intersect]
+            vector.to_file(os.path.join(proc_dir,f"{'.'.join(t.split('.')[:-1])}.gpkg"))
+            vector = vector.dissolve(by='temp')
+            vector['geometry'] = vector['geometry'].envelope
             if(src.count != band_len):
                 print(f"Error: Raster band count and specified band count are not equal, raster has {src.count} bands, not {band_len}! Please check band names!",file=sys.stderr)
                 return "error"
@@ -478,16 +480,16 @@ def process_run(proc_dir,r,gdf,pool,open_pool,wide_open=False):
 
     #pool = NDPool(threads)
     if open_pool:
-        results = pool.starmap(process_image,[(proc_dir,r,t,in_dir,t.split('.tif')[0],index_list,gdf,bands,pool,wide_open) for t in tifs])
+        results = pool.starmap(process_image,[(proc_dir,r,t,in_dir,t.split('.tif')[0],index_list,bands,pool,wide_open) for t in tifs])
     else:
-        results = [process_image(proc_dir,r,t,in_dir,t.split('.tif')[0],index_list,gdf,bands) for t in tifs]
+        results = [process_image(proc_dir,r,t,in_dir,t.split('.tif')[0],index_list,bands) for t in tifs]
     if "ERROR" in results:
         return "error"
     if verbose:
         print(f"Finished {r['indices']}")
 
 # Main function
-def zonal_stats(to_run,gpkg,out_file):
+def zonal_stats(to_run,gpkg,out_file,aoi_file=None):
     global proc_dir
     proc_dir = f".{os.getpid()}_proc_dir"
     # Create processing directories, read geopackage
@@ -561,15 +563,15 @@ def zonal_stats(to_run,gpkg,out_file):
                     out_dates[date] = [s]
             if verbose:
                 print(f"Outputting calculations/extractions to {output}")
-            results = pool.starmap(get_multilayer_tif,[(proc_dir,d,gpkg) for d in out_dates.values()])
+            results = pool.starmap(get_multilayer_tif,[(proc_dir,d,aoi_file) for d in out_dates.values()])
         if polygons:
             if verbose:
                 print("Extracting stats from processed images...")
-            results = pool.starmap(run_exact_extract,[(proc_dir,s,gpkg,pool,open_pool,uid) for s in sub_dirs])
+            results = pool.starmap(run_exact_extract,[(proc_dir,s,(os.path.join(proc_dir,f"{s}.gpkg")),pool,open_pool,uid) for s in sub_dirs])
         else:
             if verbose:
                 print("Extracting point values from processed images...")
-            results = pool.starmap(get_point_values,[(proc_dir,s,gpkg,pool,open_pool) for s in sub_dirs])
+            results = pool.starmap(get_point_values,[(proc_dir,s,(os.path.join(proc_dir,f"{s}.gpkg")),pool,open_pool) for s in sub_dirs])
         
         pool.close()
         pool.join()
@@ -577,7 +579,7 @@ def zonal_stats(to_run,gpkg,out_file):
     # Join outputs
     for x in results:
         if type(x) != type(None):
-            gdf = gdf.merge(x, on=uid)
+            gdf = gdf.merge(x, on=uid, how="outer")
     shutil.rmtree(proc_dir)
 
     # Create output geopackage
@@ -618,17 +620,28 @@ if __name__ == '__main__':
                     if "q" in a:
                         verbose = False
                         flag = True
-                    #if "u" in a:
-                    #    flag = True
-                    #    uid = sys.argv[n+1]
-                    #    toRemove.append(sys.argv[n+1])
                     if "o" in a:
                         flag = True
-                        if os.path.exists(sys.argv[n+1]):
+                        if os.path.exists(sys.argv[n+1]) and os.path.isdir(sys.argv[n+1]):
                             output = sys.argv[n+1]
                             toRemove.append(sys.argv[n+1])
                         else:
                             print(f"{sys.argv[n+1]} is an invalid path for output directory!",file=sys.stderr)
+                            sys.exit(-1)
+                    if "O" in a:
+                        flag = True
+                        if os.path.exists(sys.argv[n+1]) and os.path.isdir(sys.argv[n+1]):
+                            output = sys.argv[n+1]
+                            toRemove.append(sys.argv[n+1])
+                            if os.path.exists(sys.argv[n+2]) and os.path.isfile(sys.argv[n+2]):
+                                aoi_file = sys.argv[n+2]
+                                toRemove.append(sys.argv[n+2])
+                            else:
+                                print(f"{sys.argv[n+2]} is an invalid file path for area of interest!",file=sys.stderr)
+                                sys.exit(-1)
+                        else:
+                            print(f"{sys.argv[n+1]} is an invalid path for output directory!",file=sys.stderr)
+                            sys.exit(-1)
                     if "i" in a:
                         flag = True
                         if sys.argv[n+1][0] == "[" and sys.argv[n+1][-1] == "]" and sys.argv[n+1] != "[]":
@@ -758,4 +771,4 @@ if __name__ == '__main__':
             if len(to_run) == 0:
                 print("Please pass indices to be run!!",file=sys.stderr)
                 sys.exit(-1)
-            zonal_stats(to_run,sys.argv[1],sys.argv[2])
+            zonal_stats(to_run,sys.argv[1],sys.argv[2],aoi_file=aoi_file)
