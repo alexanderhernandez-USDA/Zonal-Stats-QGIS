@@ -74,18 +74,6 @@ Once the plugin has been installed, you can open it by clicking on its icon.
 
 The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. 
 
-![image](https://github.com/user-attachments/assets/786c31f3-7f28-4efc-9b40-bbab2b811f86)
-
-
-
-
-
-
-
-
-
-
-
 After selecting your input folder, input geopackage, and output geopackage, you can then select the calculation/extraction type. There are four options:
 1. Raw Extraction - Gets raw values from images
 2. Volume Calculation - Calculates volumes for each polygon in geopackage (input images should be DSM/DEM rasters)
@@ -95,6 +83,12 @@ After selecting your input folder, input geopackage, and output geopackage, you 
 The Raw Extraction and Index Calculations options require that the image band order be listed as well. Band names should be lowercase, and separated by commas (no spaces), like so:
 
 red,green,blue,rededge,nir
+
+**Let's take a look at the first option:**
+
+![image](https://github.com/user-attachments/assets/25237ed3-9c4f-42e3-9d5e-9f9d2d0aa0e1)
+
+
 
 Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
 
