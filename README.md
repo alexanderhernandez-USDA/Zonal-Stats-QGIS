@@ -60,6 +60,7 @@ Once you download the zip file, unzip it and you will get a folder structure as 
 |:---|:---|:---|
 |//Sample | Site_points.gpkg | Point geometries |
 |//Sample/Orthos | Three RGB TIFF files | Orthophotos - images |
+|//Sample/DSMs | Three DSM TIFF files | Digital Surface Models - images |
 
 * **Please note that you can use polygon geometries (i.e. your own plots' or stands' polygons directly - we only provided points in this exercise so that folks could see the functionality of generating areas of interest (circular or rectangular) around point geometries**
 
