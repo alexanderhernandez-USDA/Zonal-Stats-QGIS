@@ -89,6 +89,9 @@ red,green,blue,rededge,nir
 
 ![image](https://github.com/user-attachments/assets/25237ed3-9c4f-42e3-9d5e-9f9d2d0aa0e1)
 
+![409349033-25237ed3-9c4f-42e3-9d5e-9f9d2d0aa0e1](https://github.com/user-attachments/assets/30be1ba5-2694-4e64-8582-b9c512539db4)
+
+
 **Click Run and once it shows 100% click Close**
 
 If we open the output geopackage in QGIS and open the attribute table we can see that there are columns for the different bands (i.e. red, green, blue) values for each of the dates that the orthophotos were collected and that this information is available for each of the point geometries.
