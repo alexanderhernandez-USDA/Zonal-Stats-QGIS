@@ -137,6 +137,11 @@ And if we open the atribute table for the output geopackage (i.e. Site_points_VI
 
 <img width="877" alt="MultispectralRefs" src="https://github.com/user-attachments/assets/a9ea3628-d7bc-4200-aa65-53da80cb4d35" />
 
+**Now let's try to extract volumes from the Digital Surface Models (DSMs) provided**
+
+- The plugin follows the algorithm to compute volumes from the DSM following Hernandez et al., 2024 - https://doi.org/10.3390/grasses3020007 where it basically uses the corners of polygon geometries to create a plane that is used to compute a "cut and fill" volume from the DSM as presente in the following figure:
+
+![image](https://github.com/user-attachments/assets/77cf81e1-7ce6-4421-8343-a0fc21ba14f8)
 
 
 Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
