@@ -60,7 +60,7 @@ Once you download the zip file, unzip it and you will get a folder structure as 
 |//Sample | Site_points.gpkg | Point geometries |
 |//Sample/Orthos | Three RGB TIFF files | Orthophotos - images |
 
-Pay attention to the *.TIFF file names - Notice that these images contain dates in their filenames. Dates can be delimited using ., _, or -. The following are three vaild formats:
+Pay attention to the *.TIFF file names - Notice that these images contain dates in their filenames. Dates can be delimited using ., _, or -. The following are three valid formats:
 
 YYYY_MM_DD  
 DD.MM.YYYY  
@@ -72,8 +72,18 @@ Once the plugin has been installed, you can open it by clicking on its icon.
 <img width="76" alt="icon" src="https://github.com/user-attachments/assets/826d45ff-26be-4f26-8b28-dcbc1756fb30" />
 
 
+The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. 
 
-The plugin requires the path to an input folder, input geopackage, and output geopackage. Your input folder should contain the images you want to run on. Please verify that 
+![image](https://github.com/user-attachments/assets/393eda5d-dee1-411b-85da-78dd4dfe01d5)
+
+
+
+
+
+
+
+
+
 
 After selecting your input folder, input geopackage, and output geopackage, you can then select the calculation/extraction type. There are four options:
 1. Raw Extraction - Gets raw values from images
