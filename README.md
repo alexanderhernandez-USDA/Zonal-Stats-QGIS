@@ -161,12 +161,11 @@ Once the calculation has been done, you can open the output geopackage and check
 
 ![image](https://github.com/user-attachments/assets/9140edbd-2319-41c8-9655-a46ff5d44733)
 
-Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
+# Extra features
 
-- Point extraction - If your input geopackage has points, not polygons, you can select this to extract values at those points.
-- Polygon generation - If your input geopackage has points, select the option for using points. An additional checkbox will appear for creating buffers around the points. Check this box, and you can then choose between a square or circle buffer, and set the buffer size in meters.
-- Save intermediate calculations - When calculating indices, the calculations are temporarily saved to disk. Selecting this option will let you choose a folder to save these intermediate calculations to. They will be saved in a multilayer raster by date.
-- Threading - By default, only one thread is used for processing. If you would like to use more threads/cores for processing, you can set the number of threads to use.
+## Save intermediate calculations
+- When calculating indices, the intermediate rasters or grids are temporarily saved to disk. Selecting this option will let you choose a folder to save these intermediate calculations to. They will be saved in a multilayer raster by date. This multilayer raster will have one layer for each one of the vegetation indices that were requested during calculation. In addition this multilayer TIFF can be very useful in geospatial predictions in open-source environments such as R or Python.
+## Threading
+- By default, only one thread is used for processing. If you would like to use more threads/cores for processing, you can set the number of threads to use.
 
-
-After setting all the options and inputs as desired, you can then hit 'Run'. This will start the processing. It will run in the background (you should see a new task start, an a loading bar should appear in the bottom bar of QGIS), and when it is finished the loading bar in the plugin will go to 100%. A popup banner will likely appear as well to indicate that the processing task has finished.
+# References
