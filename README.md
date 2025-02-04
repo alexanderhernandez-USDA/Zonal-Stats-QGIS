@@ -102,6 +102,17 @@ If we open the output geopackage in QGIS, and overlay the input point geometries
 
 ![image](https://github.com/user-attachments/assets/ddfbde77-e3b4-4efa-bec0-9a7ecb378762)
 
+**Now let's try to compute vegetation indices. The plugin has a couple dozen vegetation indices that can be calculate using the input bands. For the sample dataset that we have provided here we only have three bands: RED, GREEN, BLUE. In other words we can only request vegetation indices that build upon these three bands. Let's try to  create polygon rectangular geometries (0.55 m) around each one of the points.**
+
+Observe that we first click on the Calculation Type dropbox and select **Index Calculations**
+![image](https://github.com/user-attachments/assets/37dfc616-64cb-4cfc-82cb-fd08166092ae)
+
+
+
+
+
+
+
 
 Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
 
