@@ -1,6 +1,15 @@
 # Zonal-Stats-QGIS
 Quantum GIS (QGIS) plugin to perform several tasks that facilitate geospatial predictive modeling from multispectral datasets. The plugin can be used to extract spectral band values, compute vegetation indices such as NDVI, NDRE, RVI and others from the spectral bands as well as estimating volumes from digital surface models (DSMs). The plugin allows the reduction of pixels values contained in polygons to median zonal statistics. Users can process single rasters (i.e. one unmanned aerial vehicle UAV flight mission) or a time series of UAV flights. 
 
+# Packages/Environment
+Currently, the most recent version of the plugin uses the following major python packages (not including those part of the default Python installation)
+
+Geopandas (and therefore Pandas): https://geopandas.org/
+Rasterio: https://rasterio.readthedocs.io/
+Exactextract: https://github.com/isciences/exactextract
+Shapely: https://shapely.readthedocs.io/en/stable/manual.html
+Scikit-image (skimage): https://scikit-image.org/
+Numpy: https://numpy.org/
 
 # Important Note
 This QGIS plugin is still under experimental development and testing, as a result it is not unlikely that errors may occur when trying to install or run the plugin. Please feel free to report any errors on the issues page. So far, it has been tested on the following platforms and versions:
