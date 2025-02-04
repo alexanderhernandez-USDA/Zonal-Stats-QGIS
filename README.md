@@ -107,7 +107,7 @@ If we open the output geopackage in QGIS, and overlay the input point geometries
 Observe that we first click on the Calculation Type dropbox and select **Index Calculations**
 ![image](https://github.com/user-attachments/assets/37dfc616-64cb-4cfc-82cb-fd08166092ae)
 
-We then select the vegetation indices that we need - 
+We then select the vegetation indices that we need - and in this case we had decided to generate rectangular boxes around each point geometry
 
 ![image](https://github.com/user-attachments/assets/338c6005-cca6-49f2-aaf4-914f466115ce)
 
