@@ -32,7 +32,7 @@ In QGIS, go to the plugins menu, select 'Manage and Install Plugins', then go to
 
 
 
-Here, select the zip file you downloaded and click 'Install Plugin'. You will get a security warning about installing plugins from "unstrusted sources". You can click "Yes" to continue with the installation process.
+Here, select the zip file you downloaded and click 'Install Plugin'. You will get a security warning about installing plugins from "untrusted sources". You can click "Yes" to continue with the installation process.
 ![image](https://github.com/user-attachments/assets/b6d5a164-9cf1-463f-a00e-7cfda87e7b25)
 
 
