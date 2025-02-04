@@ -97,6 +97,7 @@ If we open the output geopackage in QGIS and open the attribute table we can see
 ![image](https://github.com/user-attachments/assets/c596356d-dd1c-48b7-8c78-a6629e174f94)
 
 **Now imagine that you want to create polygon geometries around each one of the point geometries. The plugin allows you to create circular or rectangular polygons. Let's try the option to create circular buffers of 55 centimeters (0.55 m) and then extract the median value within each one of the polygon geometries**
+
 ![409352749-bed7db4f-5ec1-4203-a4f0-07e4b05b0f92](https://github.com/user-attachments/assets/30222618-7e8b-4dc6-bb98-3f0c9068dc24)
 
 
