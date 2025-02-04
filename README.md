@@ -66,7 +66,7 @@ YYYY_MM_DD
 DD.MM.YYYY  
 MM-DD-YYYY  
 
-_Keep in mind that the plugin has been developed to process one orthophoto or a time series of orthophotos and as such we need to differentiate when the different images were collected_
+**Keep in mind that the plugin has been developed to process one orthophoto or a time series of orthophotos and as such we need to differentiate when the different images were collected**
 
 Once the plugin has been installed, you can open it by clicking on its icon. 
 <img width="76" alt="icon" src="https://github.com/user-attachments/assets/826d45ff-26be-4f26-8b28-dcbc1756fb30" />
