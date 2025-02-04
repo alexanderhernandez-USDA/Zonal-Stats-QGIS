@@ -90,6 +90,16 @@ red,green,blue,rededge,nir
 
 **Click Run and once it shows 100% click Close**
 
+If we open the output geopackage in QGIS and open the attribute table we can see that there are columns for the different bands (i.e. red, green, blue) values for each of the dates that the orthophotos were collected and that this information is available for each of the point geometries.
+
+![image](https://github.com/user-attachments/assets/c596356d-dd1c-48b7-8c78-a6629e174f94)
+
+
+
+
+
+
+
 Once the calculation/extraction type has been selected, you can then select additional options. The options include point extraction, generating polygons from points, threading, setting a UID, and saving intermediate calculation rasters. An explanation for each of these options is below:
 
 - Point extraction - If your input geopackage has points, not polygons, you can select this to extract values at those points.
