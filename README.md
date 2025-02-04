@@ -132,6 +132,9 @@ And if we open the atribute table for the output geopackage (i.e. Site_points_VI
 ![image](https://github.com/user-attachments/assets/a73a8d60-5bfc-45d0-a2c7-17f4c04e382d)
 
 
+**In case you have multispectral imagery (i.e. in addition to the RGB bands you also have Red Edge, Near Infrared NIR) there are additional vegetation indices that can be calculated with the plugin - Please see following table:**
+
+<img width="877" alt="MultispectralRefs" src="https://github.com/user-attachments/assets/a9ea3628-d7bc-4200-aa65-53da80cb4d35" />
 
 
 
