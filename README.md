@@ -111,7 +111,7 @@ Observe that we first click on the Calculation Type dropbox and select **Index C
 
 ![409355737-37dfc616-64cb-4cfc-82cb-fd08166092ae](https://github.com/user-attachments/assets/2a928490-90c9-4b5d-a1e7-c910b49742e7)
 
-The following RGB-based vegetation indices are currently available in the plugin:
+The following RGB-based vegetation indices are currently available in the plugin (From Hernandez *et al*., 2025):
 
 ![409679281-656c3227-84d6-46e4-843c-3f7dff670d2b](https://github.com/user-attachments/assets/7de58324-3ec1-464d-a0c8-50e85e0ab2c8)
 
