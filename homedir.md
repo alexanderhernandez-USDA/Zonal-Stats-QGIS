@@ -28,4 +28,17 @@ Click on the link for the version of your interest:
 
 [Python Command-Line Version](https://github.com/alexanderhernandez-USDA/Zonal_Stats_3/blob/main/README.md)
 
+> python3 zonal_stats_3.py -i [BI,SCI,GLI] flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg
+#Runs with indices BI, SCI, and GLI
 
+python3 zonal_stats_3.py -u pid -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg
+#Runs with all indices, unique ID column set to 'pid'
+
+python3 zonal_stats_3.py -a flight/rasters/ [red,green,blue,redege,nir] flight/package.gpkg zonal_stats.gpkg
+#Runs all indices with band order red, green, blue, NIR, RedEdge
+
+python3 zonal_stats_3.py -n flight/thermals/ [swir] flight/rasters/ flight/package.gpkg zonal_stats.gpkg
+#Runs zonal stats on the thermals directory getting raw values
+
+python3 zonal_stats_3.py -v flight/dsms/ flight/package.gpkg zonal_stats.gpkg
+# Performs volume calculation using a plane average
