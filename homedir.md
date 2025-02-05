@@ -2,6 +2,16 @@
 
 Welcome - This is the start point to access geospatial tools that have been developed by the USDA / ARS Forage and Range Research Lab in Logan Utah to process imagery collected using unmanned aerial vehicles - aka "drones".
 
+These tools will help you:
+
+* Generate a suite of vegetation indices (i.e. NDVI, RVI, NDRE, Greenness) from regular Red Green Blue RGB imagery as well as multispectral datasets
+* Compute "cut/fill" volumes from digital surface models DSM
+* Generate circular or rectangular buffers (areas of interest AOI) around point geometries
+* Use polygon geometries (i.e. agricultural plots boundaries) to extract zonal statistics
+* Save the vegetation indices as output multilayer rasters that can be used for predictive modeling purposes
+
+ 
+
 Click on the link for the version of your interest:
 
 
