@@ -15,7 +15,7 @@ These tools will help you:
 Click on the link for the version of your interest:
 
 
-[QGIS Version](https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS/blob/main/README.md)
+[QGIS Plugin Version](https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS/blob/main/README.md)
 
 ![icon](https://github.com/user-attachments/assets/4b2626b2-2a63-4172-9d18-ca21280921c1)
 
@@ -26,6 +26,6 @@ Click on the link for the version of your interest:
 
 
 
-[Command-Line Version](https://github.com/alexanderhernandez-USDA/Zonal_Stats_3/blob/main/README.md)
+[Python Command-Line Version](https://github.com/alexanderhernandez-USDA/Zonal_Stats_3/blob/main/README.md)
 
 
