@@ -193,3 +193,9 @@ Once the calculation has been done, you can open the output geopackage and check
 - By default, only one thread is used for processing. If you would like to use more threads/cores for processing, you can set the number of threads to use.
 
 # References
+
+Baston, D., ISciences, L.L.C., Baston, M.D., 2022. Package ‘exactextractr.’ terra 1, 17.![image](https://github.com/user-attachments/assets/1deb0167-f0e4-4b61-a01d-761c8833c1eb)
+
+Hernandez, A., Jensen, K., Larson, S., Larsen, R., Rigby, C., Johnson, B., Spickermann, C. and Sinton, S., 2024. Using Unmanned Aerial Vehicles and Multispectral Sensors to Model Forage Yield for Grasses of Semiarid Landscapes. Grasses, 3(2), pp.84-109. https://doi.org/10.3390/grasses3020007 ![image](https://github.com/user-attachments/assets/cb263720-f09e-43d0-9dc4-58158f6a3e32)
+
+Hernandez, A., Duarte, E., Porter, P., and Brecht, H. 2025. Spatial predictions of soil moisture across a longitudinal gradient in semiarid ecosystems using UAVs and RGB sensors. Geocarto International![image](https://github.com/user-attachments/assets/73f26f35-14fb-4884-afc9-6ffd29340d2f)
