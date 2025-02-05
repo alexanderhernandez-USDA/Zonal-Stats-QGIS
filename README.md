@@ -10,6 +10,8 @@ Quantum GIS (QGIS) plugin to perform several tasks that facilitate geospatial pr
 
 [Download the zip file](###Download-the-zip-file)
 
+[Extra Features](#Extra-Features)
+
 
 # Packages/Environment
 Currently, the most recent version of the plugin uses the following major python packages (not including those part of the default Python installation)
