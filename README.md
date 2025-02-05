@@ -6,9 +6,11 @@ Quantum GIS (QGIS) plugin to perform several tasks that facilitate geospatial pr
 
 [Important Note](#Important-Note)
 
-[Installation](##Installation)
+[Installation](#Installation)
 
-[Download the zip file](###Download-the-zip-file)
+[Prerequisites](#Prerequisites)
+
+[Download the zip file](#Download-the-zip-file)
 
 [Extra Features](#Extra-Features)
 
