@@ -1,4 +1,12 @@
-# Zonals Stats and Volume Extractions Tools
+# User’s manual for the zonal stats and volume extractions command-line tools and QGIS plugin
+
+
+
+Alexander Hernandez and Kaden Patten
+
+US Department of Agriculture—Agricultural Research Service, Forage & Range Research Laboratory, Logan, UT 84322-6300, USA
+alexander.hernandez@usda.gov
+kaden.patten@usda.gov
 
 Welcome - This is the start point to access geospatial tools that have been developed by the USDA / ARS Forage and Range Research Lab in Logan Utah to process imagery collected using unmanned aerial vehicles - aka "drones".
 
