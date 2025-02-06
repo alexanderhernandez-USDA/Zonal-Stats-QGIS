@@ -2,13 +2,13 @@
 
 
 
-Alexander Hernandez and Kaden Patten
+**Alexander Hernandez and Kaden Patten**
 
 US Department of Agriculture—Agricultural Research Service, Forage & Range Research Laboratory, Logan, UT 84322-6300, USA
 
-> alexander.hernandez@usda.gov
+> _alexander.hernandez@usda.gov_
 
-> kaden.patten@usda.gov
+> _kaden.patten@usda.gov_
 
 Welcome - This is the start point to access geospatial tools that have been developed by the USDA / ARS Forage and Range Research Lab in Logan Utah to process imagery collected using unmanned aerial vehicles - aka "drones".
 
