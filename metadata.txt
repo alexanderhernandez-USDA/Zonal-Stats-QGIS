@@ -10,7 +10,7 @@ version=0.1
 author=USDA ARS FRR, Kaden Patten, Alexander Hernandez
 email=kaden.patten@usda.gov
 
-about=The Zonal Statistics plugin can be used to calculate various vegetation indices on georectified orthomosaics and then extract data on a per polygon/point basis from those index calculations. Additionally, raw data extraction and volume calculation can also be performed.
+about=The Zonal Statistics plugin can be used to calculate various vegetation indices on georectified orthomosaics and then extract data on a per polygon/point basis from those index calculations. Additionally, raw data extraction and volume calculation can also be performed. This plugin does have dependencies on several python packages, however upon installation a virtual environment is created to handle these, and no interaction is needed from the user.
 
 tracker=https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS/issues
 repository=https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS
@@ -26,7 +26,7 @@ hasProcessingProvider=no
 tags=python, drone, qgis-plugin, statistics, vector, raster
 
 homepage=https://github.com/alexanderhernandez-USDA/Zonal-Stats-QGIS
-category=Plugins
+category=Analysis
 icon=icon.png
 # experimental flag
 experimental=True

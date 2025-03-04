@@ -212,6 +212,10 @@ def calc_volume(proc_dir,t,in_dir,tName,bands,r):
     final = volumes * pos
     kwargs = dsm_raw.meta
 
+    with rasterio.open(os.path.join(proc_dir,tName,tName+'_HEIGHTS.tif'),'w',**kwargs) as dst:
+        dst.write(heights,1)
+        dst.close()
+
     with rasterio.open(os.path.join(proc_dir,tName,tName+'_VOLUME.tif'),'w',**kwargs) as dst:
         dst.write(final,1)
         dst.close()

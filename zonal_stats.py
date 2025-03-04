@@ -25,9 +25,9 @@ from qgis.core import Qgis, QgsTask, QgsApplication
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, pyqtSignal, QObject
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QFileInfo, Qt
-from qgis.PyQt.QtGui import QIcon, QPixmap, QGuiApplication
-from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QGraphicsScene, QFrame, QGraphicsPixmapItem, QListWidget, QListWidgetItem, QApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QListWidgetItem, QApplication
 import subprocess, platform, re
 
 # Initialize Qt resources from file resources.py
