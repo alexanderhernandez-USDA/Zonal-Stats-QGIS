@@ -214,6 +214,7 @@ def calc_volume(proc_dir,t,in_dir,tName,bands,r):
 
     pos_heights = (heights > 0).astype(int)
     heights = heights * pos_heights
+    heights = np.where(heights==0,dsm_raw.nodata,heights)
 
     with rasterio.open(os.path.join(proc_dir,tName,tName+'_HEIGHTS.tif'),'w',**kwargs) as dst:
         dst.write(heights,1)
